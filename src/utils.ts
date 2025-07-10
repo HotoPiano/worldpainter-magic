@@ -5,7 +5,7 @@ import { loopCoordinates } from "./mapDimensions";
 export function raiseAll(value: number) {
   loopCoordinates((x, y) => {
     dimension.setHeightAt(x, y, dimension.getHeightAt(x, y) + value);
-    var waterLevel = dimension.getWaterLevelAt(x, y);
+    let waterLevel = dimension.getWaterLevelAt(x, y);
     if (waterLevel > 0) {
       dimension.setWaterLevelAt(x, y, waterLevel - value);
     }

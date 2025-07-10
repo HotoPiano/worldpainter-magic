@@ -165,7 +165,7 @@ export function createTerrain({ name, materials, scale }: TerrainProps) {
     mixedMaterial = new org.pepsoft.worldpainter.MixedMaterial(name + "-mm_terrain", mixedMaterialRowsParam, biome, colour);
   }
   //log("mixedMaterial terrain getMode", mixedMaterial.getMode(), mixedMaterial.getName());
-  var customTerrainIndex = wp.installCustomTerrain(mixedMaterial).toWorld(world).go(); //.inSlot(1) after toWorld()
+  let customTerrainIndex = wp.installCustomTerrain(mixedMaterial).toWorld(world).go(); //.inSlot(1) after toWorld()
   const ground = org.pepsoft.worldpainter.Terrain.VALUES[fixIndex(customTerrainIndex)];
   colour += 10000;
   //colour++;
@@ -209,7 +209,7 @@ const groundMaterialRow2 = new org.pepsoft.worldpainter.MixedMaterial.Row(ground
 
 const mixedMaterialTerrainGround1 = new org.pepsoft.worldpainter.MixedMaterial("test2", [groundMaterialRow1, groundMaterialRow2], -1, 1);
 
-var customTerrainIndex = wp
+let customTerrainIndex = wp
   .installCustomTerrain(mixedMaterialTerrainGround1)
   .toWorld(world) //.inSlot(1)
   .go();

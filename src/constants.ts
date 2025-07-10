@@ -1,11 +1,14 @@
 const appDataPath = java.lang.System.getenv("AppData");
 
-const EXISTING_WORLDPAINTER_WORLD_NAME = "test2.world";
+const EXISTING_WORLDPAINTER_WORLD_NAME = "test.world";
+const isArdaCraft = true;
+
+const GAMEDIR = isArdaCraft ? "ArdaCraft" : "Conquest Reforged Modpack (Fabric)";
 const SAVE_CHANGES_TO_WORLDPAINTER_WORLD_NAME = EXISTING_WORLDPAINTER_WORLD_NAME.split(".").join("_1.");
 export const LAYERS_DIR = appDataPath + "\\WorldPainter\\layers_and_terrains\\";
 export const WORLD_FILE_LOCATION = appDataPath + "\\WorldPainter\\worlds\\" + EXISTING_WORLDPAINTER_WORLD_NAME;
 export const WORLD_FILE_SAVE = appDataPath + "\\WorldPainter\\worlds\\" + SAVE_CHANGES_TO_WORLDPAINTER_WORLD_NAME;
-export const EXPORT_FILE_SAVE_DIR = appDataPath + "\\PrismLauncher\\instances\\ArdaCraft\\minecraft\\saves\\";
+export const EXPORT_FILE_SAVE_DIR = appDataPath + `\\PrismLauncher\\instances\\${GAMEDIR}\\minecraft\\saves\\`;
 
 /**
  * using 100% spawnrate on trees so we can completely control whether patches of no vegetation shall appear
