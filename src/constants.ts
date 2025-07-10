@@ -1,6 +1,6 @@
 const appDataPath = java.lang.System.getenv("AppData");
 
-const EXISTING_WORLDPAINTER_WORLD_NAME = "test.world";
+const EXISTING_WORLDPAINTER_WORLD_NAME = "test2.world";
 const isArdaCraft = true;
 
 const GAMEDIR = isArdaCraft ? "ArdaCraft" : "Conquest Reforged Modpack (Fabric)";

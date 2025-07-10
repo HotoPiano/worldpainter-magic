@@ -15,16 +15,24 @@ const groundCoverLayers = {
   groundDesert: createGroundCoverLayer({
     name: "ground_desert",
     materials: [
-      { identifier: "conquest:grass_block_layer", count: 800, scale: 1 },
+      { identifier: "conquest:grass_block_layer", count: 200, scale: 1 },
       { identifier: "conquest:light_green_sphagnum_moss_block_layer", count: 400, scale: 1 },
+      { identifier: "conquest:mossy_sandstone_debris_layer", count: 400, scale: 1 },
+      /*
+conquest: 
+      { identifier: "conquest:grass_block_layer", count: 600, scale: 1 },
+      { identifier: "conquest:light_green_sphagnum_moss_block_layer", count: 400, scale: 1 },
+      */
     ],
     scale: 1,
   }),
   groundTaiga: createGroundCoverLayer({
     name: "ground_taiga",
     materials: [
-      { identifier: "conquest:grass_block_layer", count: 800, scale: 1 },
+      { identifier: "conquest:grass_block_layer", count: 100, scale: 1 },
       { identifier: "conquest:fir_forest_floor_layer", count: 100, scale: 1 },
+      { identifier: "conquest:clover_covered_grass_layer", count: 300, scale: 1 },
+      { identifier: "conquest:taiga_grass_layer", count: 300, scale: 1 },
     ],
     scale: 1,
   }),
