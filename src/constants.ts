@@ -1,11 +1,14 @@
+const homePath = java.lang.System.getProperty("user.home");
 const appDataPath = java.lang.System.getenv("AppData");
 
-const EXISTING_WORLDPAINTER_WORLD_NAME = "test2.world";
+const EXISTING_WORLDPAINTER_WORLD_NAME = "duskridge20g_high-res-heightmap.world";
+//const EXISTING_WORLDPAINTER_WORLD_NAME = "test.world";
 const isArdaCraft = true;
 
 const GAMEDIR = isArdaCraft ? "ArdaCraft" : "Conquest Reforged Modpack (Fabric)";
 const SAVE_CHANGES_TO_WORLDPAINTER_WORLD_NAME = EXISTING_WORLDPAINTER_WORLD_NAME.split(".").join("_1.");
-export const LAYERS_DIR = appDataPath + "\\WorldPainter\\layers_and_terrains\\";
+//export const LAYERS_DIR = appDataPath + "\\WorldPainter\\layers_and_terrains\\";
+export const LAYERS_DIR = homePath + "\\projects\\worldpainter-magic\\src\\palettes\\conquest\\1\\layers\\";
 export const WORLD_FILE_LOCATION = appDataPath + "\\WorldPainter\\worlds\\" + EXISTING_WORLDPAINTER_WORLD_NAME;
 export const WORLD_FILE_SAVE = appDataPath + "\\WorldPainter\\worlds\\" + SAVE_CHANGES_TO_WORLDPAINTER_WORLD_NAME;
 export const EXPORT_FILE_SAVE_DIR = appDataPath + `\\PrismLauncher\\instances\\${GAMEDIR}\\minecraft\\saves\\`;
