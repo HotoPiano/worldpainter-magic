@@ -99,6 +99,14 @@ const terrains = {
       { identifier: "conquest:coastal_red_sandstone", count: 2 },
     ],
   }),
+  beachDarkColoredSand: createTerrain({
+    name: "beach_dark_colored_sand",
+    materials: [
+      { identifier: "conquest:dark_brown_sand_layer", count: 50, scale: 1 },
+      { identifier: "conquest:wet_river_sand_layer", count: 50, scale: 1 },
+    ],
+    scale: 2,
+  }),
   beachBottom: createTerrain({
     name: "brown_sand",
     materials: [{ identifier: "conquest:brown_sand" }],

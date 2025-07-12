@@ -21,11 +21,12 @@ const MOUNTAIN_EDGE_SLOPE = 0.77;
 type Block = { layer: GroundCoverLayerType | null; topLayer: GroundCoverLayerType | null; treeLayer: any; terrain: any; biome: any };
 type Environment = { x: number; y: number; floodedCountZero: number; height: number; slope: number; addedSlope: number };
 
+const willPerformMagic = true;
 const willExportWorld = false;
 
 const willDoCoastline = false;
 const willDoSnow = true;
-const willDoMountains = false;
+const willDoMountains = true;
 const willDoSurfaceFoliage = false;
 const willShiftHeight = false;
 
@@ -42,6 +43,36 @@ const performMagic = () => {
 
 let currentlyDoingSand = false;
 let currentTile = 0;
+
+const doCoastline = () => {
+  loopCoordinates((x, y) => {
+    const height = dimension.getHeightAt(x, y);
+    const addedSlope = height / HEIGHEST_HEIGHT / 2 - 0.2;
+    const actualSlope = dimension.getSlope(x, y);
+    const slope = actualSlope + addedSlope;
+    //const waterLevel = dimension.getWaterLevelAt(x, y);
+    const floodedCountZero = dimension.getFloodedCount(x, y, 0, false);
+
+    // maybe check every block???
+    if (floodedCountZero > 0 && slope < MOUNTAIN_EDGE_SLOPE) {
+      let hasFloodedNeighbour = false;
+      let hasLandNeighbour = false;
+      loopOffset(x, y, 1, 1, (x2, y2) => {
+        if (x2 == x && y2 == y) return;
+        if (dimension.getFloodedCount(x2, y2, 0, false) > 0) {
+          hasFloodedNeighbour = true;
+        } else {
+          hasLandNeighbour = true;
+        }
+      });
+
+      // by coast, start expanding outwards
+      if (hasLandNeighbour && hasFloodedNeighbour) {
+        iterateCoastLine(x, y);
+      }
+    }
+  }, "coastline");
+};
 
 const doRest = () => {
   loopCoordinates((x, y, tileNumber) => {
@@ -92,44 +123,14 @@ const doRest = () => {
 
     // always placing terrain and layer
     dimension.setBitLayerValueAt(waterloggedLayer ? block.layer.waterlogged : block.layer.normal, x, y, true);
-    //dimension.setTerrainAt(x, y, block.terrain);
+    dimension.setTerrainAt(x, y, block.terrain);
 
     // optionally placing toplayer (like grass), treelayer, biomelayer
     if (block.topLayer != null && block.treeLayer == null)
       dimension.setBitLayerValueAt(waterloggedTopLayer ? block.topLayer.waterlogged : block.topLayer.normal, x, y, true);
     if (block.treeLayer != null) dimension.setLayerValueAt(block.treeLayer, x, y, MAX_TREE_SPAWN_RATE);
     if (block.biome != null) dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, block.biome);
-  });
-};
-
-const doCoastline = () => {
-  loopCoordinates((x, y) => {
-    const height = dimension.getHeightAt(x, y);
-    const addedSlope = height / HEIGHEST_HEIGHT / 2 - 0.2;
-    const actualSlope = dimension.getSlope(x, y);
-    const slope = actualSlope + addedSlope;
-    //const waterLevel = dimension.getWaterLevelAt(x, y);
-    const floodedCountZero = dimension.getFloodedCount(x, y, 0, false);
-
-    // maybe check every block???
-    if (floodedCountZero > 0 && slope < MOUNTAIN_EDGE_SLOPE) {
-      let hasFloodedNeighbour = false;
-      let hasLandNeighbour = false;
-      loopOffset(x, y, 1, 1, (x2, y2) => {
-        if (x2 == x && y2 == y) return;
-        if (dimension.getFloodedCount(x2, y2, 0, false) > 0) {
-          hasFloodedNeighbour = true;
-        } else {
-          hasLandNeighbour = true;
-        }
-      });
-
-      // by coast, start expanding outwards
-      if (hasLandNeighbour && hasFloodedNeighbour) {
-        iterateCoastLine(x, y);
-      }
-    }
-  });
+  }, "the rest");
 };
 
 const iterateCoastLine = (x: number, y: number) => {
@@ -246,16 +247,23 @@ const doSnow = (block: Block, { x, y, addedSlope, floodedCountZero, height, slop
   // 25 - (500 / 100) = 25 - 5 = 20
   // 25 - (1500 / 100) = 25 - 15 = 10
   //const steeperLimit = 25 - Math.min(height, SNOW_SAME_AFTER) / 100;
-  const onePerTwoHoundredHeight = Math.round(HEIGHEST_HEIGHT / 200); // +10 at 2000
-  const steeperLimit = 15 + onePerTwoHoundredHeight - Math.min(height, SNOW_SAME_AFTER) / 100;
-
+  //const onePerTwoHoundredHeight = Math.round(HEIGHEST_HEIGHT / 200); // +10 at 2000
+  //const steeperLimit = 15 + onePerTwoHoundredHeight - Math.min(height, SNOW_SAME_AFTER) / 100;
+  const onePerHoundredHeight = Math.round(HEIGHEST_HEIGHT / 100); // +10 at 2000
+  //const steeperLimit = 5 + onePerHoundredHeight - Math.min(height, SNOW_SAME_AFTER) / 100;
+  // (2000 / 500 = 4) * 5 = 20
+  // (2000 / 1500 = 1.33) * 5 = 6.67
+  const steeperLimit = (HEIGHEST_HEIGHT / Math.min(height, SNOW_SAME_AFTER)) * 5;
   // (500 / 1000) = 0.5
   // (1500 / 1000) = 1.5
-  //const slopeLimit = Math.min(height, SNOW_SAME_AFTER) / 1000 + 0.5;
-  const slopeLimit = Math.min(height, SNOW_SAME_AFTER) / 1000;
+  //const slopeLimit = Math.min(height, SNOW_SAME_AFTER) / 1000;
+  const slopeLimit2 = Math.min(height, SNOW_SAME_AFTER) / (50 * onePerHoundredHeight);
+  // (500 / 2000 = 0.25) * 2 = 0.5
+  // (1500 / 2000 = 0.75) * 2 = 1.5
+  const slopeLimit = (Math.min(height, SNOW_SAME_AFTER) / HEIGHEST_HEIGHT) * 2;
 
   // consider making top y directions (north) not as impactful, so those with most sun is not as snowy? or something else
-  const range = getRandomNumber(40, 60);
+  const range = getRandomNumber(15, 20); // 40, 60
   loopOffset(x, y, range * 2, range, (x2, y2) => {
     //for (let x2 = x - range * 2; x2 <= x + range * 2; x2 = x2 + range) {
     //for (let y2 = y - range * 2; y2 <= y + range * 2; y2 = y2 + range) {
@@ -269,7 +277,7 @@ const doSnow = (block: Block, { x, y, addedSlope, floodedCountZero, height, slop
   const setSnow = (steeperNeighbours > steeperLimit || steeperNeighbours < steeperLimit / 3) && slope < slopeLimit; //|| slope - addedSlope * 3 < 0.1;
   //const setSnowBiome = floodedCountZero == 0 && height > SNOW_HEIGHT_LIMIT && steeperNeighbours > steeperLimit / 1.3 && slope < slopeLimit + 0.5;
   //const setSnowBiome = floodedCountZero == 0 && (steeperNeighbours > steeperLimit / 1.3 || slope < 1.5);
-  const setSnowBiome = steeperNeighbours > steeperLimit / 1.2 || slope - addedSlope * 3 < 0.2;
+  const setSnowBiome = setSnow; //steeperNeighbours > steeperLimit / 1.2 || slope - addedSlope * 3 < 0.2;
   if (setSnowBiome) {
     block.biome = BIOMES.FROZEN_PEAKS;
     block.treeLayer = null;
@@ -305,34 +313,35 @@ const doSnow = (block: Block, { x, y, addedSlope, floodedCountZero, height, slop
 const doMountains = (block: Block, { x, y, addedSlope, floodedCountZero, height, slope }: Environment) => {
   const slopeMtn = slope; //slope + height / HEIGHEST_HEIGHT / 2;
   if (slopeMtn <= 0.5) return;
+  if ((block.layer != null || block.terrain != null) && (block.biome != BIOMES.BEACH || block.biome != BIOMES.SAVANNA)) return;
 
   if (slopeMtn > 2.2) {
     block.terrain = terrains.mtn5LimestoneMix;
-    block.layer = layers.mtn5LimestoneMix;
+    //block.layer = layers.mtn5LimestoneMix;
   } else if (slopeMtn > 2) {
     block.terrain = terrains.mtn7DarkLimestone2;
-    block.layer = layers.mtn7DarkLimestone2;
+    //block.layer = layers.mtn7DarkLimestone2;
   } else if (slopeMtn > 1.8) {
     block.terrain = terrains.mtn7DarkLimestone1;
-    block.layer = layers.mtn7DarkLimestone1;
+    //block.layer = layers.mtn7DarkLimestone1;
   } else if (slopeMtn > 1.6) {
     block.terrain = terrains.anorthosite;
-    block.layer = layers.anorthosite;
+    //block.layer = layers.anorthosite;
   } else if (slopeMtn > 1.4) {
     block.terrain = terrains.mtn7DarkLimestone1;
-    block.layer = layers.mtn7DarkLimestone1;
+    //block.layer = layers.mtn7DarkLimestone1;
   } else if (slopeMtn > 1.2) {
     block.terrain = terrains.mtn7DarkLimestone2;
-    block.layer = layers.mtn7DarkLimestone2;
+    //block.layer = layers.mtn7DarkLimestone2;
   } else if (slopeMtn > 1) {
     block.terrain = terrains.mtn5LimestoneMix;
-    block.layer = layers.mtn5LimestoneMix;
+    //block.layer = layers.mtn5LimestoneMix;
   } else if (slopeMtn > 0.85) {
     block.terrain = terrains.mtn6WeatheredGranite;
-    block.layer = layers.mtn6WeatheredGranite;
+    //block.layer = layers.mtn6WeatheredGranite;
   } else if (slopeMtn > 0.77) {
     block.terrain = terrains.mtnColorfulGranite;
-    block.layer = layers.mtnColorfulGranite;
+    //block.layer = layers.mtnColorfulGranite;
   } else if (slopeMtn > 0.7) {
     /*
       if ((biome = BIOMES.FROZEN_PEAKS)) {
@@ -341,7 +350,7 @@ const doMountains = (block: Block, { x, y, addedSlope, floodedCountZero, height,
       } else {
       */
     block.terrain = terrains.mtn3MossyLimestone;
-    block.layer = layers.mtn3MossyLimestone;
+    //block.layer = layers.mtn3MossyLimestone;
     //}
   } else if (slopeMtn > 0.65) {
     /*if ((biome = BIOMES.FROZEN_PEAKS)) {
@@ -349,17 +358,17 @@ const doMountains = (block: Block, { x, y, addedSlope, floodedCountZero, height,
         layer = layers.snowyGraniteSlab;
       } else {*/
     block.terrain = terrains.overgrownSmallLimestones;
-    block.layer = layers.overgrownSmallLimestones;
+    //block.layer = layers.overgrownSmallLimestones;
     //}
   } else if (slopeMtn > 0.6) {
     block.terrain = terrains.mtn2BrownSphagnumMoss;
-    block.layer = layers.mtn2BrownSphagnumMoss;
+    //block.layer = layers.mtn2BrownSphagnumMoss;
   } else if (slopeMtn > 0.55) {
     block.terrain = terrains.mtn1GreenSphagnum;
-    block.layer = layers.mtn1GreenSphagnum;
+    //block.layer = layers.mtn1GreenSphagnum;
   } else if (slopeMtn > 0.5) {
     block.terrain = terrains.mtn0MossySandstoneDebris;
-    block.layer = layers.mtn0MossySandstoneDebris;
+    //block.layer = layers.mtn0MossySandstoneDebris;
   }
 };
 
@@ -593,7 +602,7 @@ loopCoordinates((x, y) => {
 });
 */
 // comment both below if wanna only export already fixed map
-performMagic();
+if (willPerformMagic) performMagic();
 /*
 loopCoordinates((x, y, tileNumber) => {
   dimension.setBitLayerValueAt(layers.ground.normal, x, y, true);

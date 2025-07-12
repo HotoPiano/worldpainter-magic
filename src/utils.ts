@@ -3,13 +3,17 @@ import log from "./log";
 import { loopCoordinates } from "./mapDimensions";
 
 export function raiseAll(value: number) {
-  loopCoordinates((x, y) => {
-    dimension.setHeightAt(x, y, dimension.getHeightAt(x, y) + value);
-    let waterLevel = dimension.getWaterLevelAt(x, y);
-    if (waterLevel > 0) {
-      dimension.setWaterLevelAt(x, y, waterLevel - value);
-    }
-  }, true);
+  loopCoordinates(
+    (x, y) => {
+      dimension.setHeightAt(x, y, dimension.getHeightAt(x, y) + value);
+      let waterLevel = dimension.getWaterLevelAt(x, y);
+      if (waterLevel > 0) {
+        dimension.setWaterLevelAt(x, y, waterLevel - value);
+      }
+    },
+    undefined,
+    true
+  );
   log("raised all by " + value);
 }
 

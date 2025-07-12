@@ -1,8 +1,9 @@
 const homePath = java.lang.System.getProperty("user.home");
 const appDataPath = java.lang.System.getenv("AppData");
 
-const EXISTING_WORLDPAINTER_WORLD_NAME = "duskridge20g_high-res-heightmap.world";
-//const EXISTING_WORLDPAINTER_WORLD_NAME = "test.world";
+//const EXISTING_WORLDPAINTER_WORLD_NAME = "duskridge20g_high-res-heightmap_small.world";
+//const EXISTING_WORLDPAINTER_WORLD_NAME = "duskridge20g_high-res-heightmap.world";
+const EXISTING_WORLDPAINTER_WORLD_NAME = "test.world";
 const isArdaCraft = true;
 
 const GAMEDIR = isArdaCraft ? "ArdaCraft" : "Conquest Reforged Modpack (Fabric)";

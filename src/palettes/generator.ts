@@ -103,7 +103,7 @@ export function createGroundCoverLayer2({
   groundCoverLayer.setThickness(thickness);
   // setThickness(int thickness)
   if (layered) groundCoverLayer.setSmooth(true);
-  colour += 10000;
+  colour += 1;
   //colour++;
   return groundCoverLayer;
 }
