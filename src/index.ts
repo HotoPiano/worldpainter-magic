@@ -19,7 +19,7 @@ const MOUNTAIN_EDGE_SLOPE = 0.77;
 type Block = { layer: GroundCoverLayerType | null; topLayer: GroundCoverLayerType | null; treeLayer: any; terrain: any; biome: any };
 type Environment = { x: number; y: number; floodedCountZero: number; height: number; slope: number; addedSlope: number };
 
-const willExportWorld = false;
+const willExportWorld = true;
 const willPerformMagic = true;
 
 const willDoCoastline = true;
@@ -158,6 +158,7 @@ const coastLineIteration = (
     if (outsideBounds) return;
     const outsideSavanna = x < xInitial - 5 || x > xInitial + 5 || y < yInitial - 5 || y > yInitial + 5;
 
+    // if already checked, go to next iteration
     if (dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y) != 255) {
       coastLineIteration(x, y, xInitial, yInitial, direction, canDoSand);
       return;

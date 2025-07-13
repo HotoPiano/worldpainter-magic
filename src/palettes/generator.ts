@@ -16,7 +16,14 @@ type MaterialParams = {
    * % for blobs. only if options: scale has value
    */
   scale?: number;
+  /**
+   * starts at 0
+   */
   random?: number;
+  /**
+   * starts at 1
+   */
+  height?: number;
 };
 
 const biome = -1;
@@ -60,13 +67,14 @@ export function createGroundCoverLayer2({
   persistent,
   waterlogged,
 }: GroundCoverLayerProps) {
-  const mixedMaterialRows = materials.map(({ identifier, count = 10, scale = 1, random }) => {
+  const mixedMaterialRows = materials.map(({ identifier, count = 10, scale = 1, random, height }) => {
     const identity = new org.pepsoft.minecraft.Material.Identity(identifier, null);
     let material = org.pepsoft.minecraft.Material.get(identity);
     if (layered) material = material.withProperty("layers", "8");
     if (persistent) material = material.withProperty("persistent", "true");
     if (waterlogged) material = material.withProperty("waterlogged", "true");
     if (random != null) material = material.withProperty("random", random);
+    if (height != null) material = material.withProperty("height", height);
     // if (watery != null) material = material.withProperty("watery", "true");
     // spawnWater = true?
     const materialRow = new org.pepsoft.worldpainter.MixedMaterial.Row(material, count, scale);

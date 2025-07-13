@@ -32,7 +32,7 @@ export const BIOMES = {
 
 export const JAVA_COLORS = [
   //java.awt.Color.BLACK,
-  java.awt.Color.BLUE,
+  //java.awt.Color.BLUE,
   java.awt.Color.CYAN,
   //java.awt.Color.DARK_GRAY,
   //java.awt.Color.GRAY,

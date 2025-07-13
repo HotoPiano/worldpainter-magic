@@ -4,11 +4,13 @@ const groundCoverLayers = {
   groundPlains: createGroundCoverLayer({
     name: "ground_plains",
     materials: [
-      { identifier: "conquest:grass_block_layer", count: 800, scale: 1 },
+      { identifier: "conquest:grass_block_layer", count: 200, scale: 1 },
       { identifier: "conquest:green_sphagnum_moss_block_layer", count: 5, scale: 1 },
       { identifier: "conquest:brown_sphagnum_moss_block_layer", count: 5, scale: 1 },
       { identifier: "conquest:mossy_sandstone_debris_layer", count: 10, scale: 1 },
       { identifier: "conquest:fir_forest_floor_layer", count: 10, scale: 1 },
+      { identifier: "conquest:clover_covered_grass_layer", count: 300, scale: 1 },
+      { identifier: "conquest:taiga_grass_layer", count: 300, scale: 1 },
     ],
     scale: 1,
   }),
@@ -16,7 +18,7 @@ const groundCoverLayers = {
     name: "ground_desert",
     materials: [
       { identifier: "conquest:grass_block_layer", count: 200, scale: 1 },
-      { identifier: "conquest:light_green_sphagnum_moss_block_layer", count: 400, scale: 1 },
+      { identifier: "conquest:light_green_sphagnum_moss_block_layer", count: 100, scale: 1 },
       { identifier: "conquest:mossy_sandstone_debris_layer", count: 400, scale: 1 },
       /*
 conquest: 
@@ -235,13 +237,101 @@ conquest:
       { identifier: "conquest:limestone_rocks", count: 3 },
     ],
     thickness: 2,
-    waterlogged: true,
+    //waterlogged: true,
   }),
+  plantsPlains: createGroundCoverLayer({
+    name: "plants_plains",
+    materials: [
+      { identifier: "conquest:wood_horsetail", count: 5, scale: 0.1, height: 1 },
+      { identifier: "conquest:wood_horsetail", count: 5, scale: 0.1, height: 2 },
+      { identifier: "conquest:kentucky_bluegrass", count: 100, scale: 0.4 },
+      { identifier: "conquest:wavy_hair_grass", count: 100, scale: 0.4 },
+      { identifier: "conquest:sparse_headed_feathergrass", count: 100, scale: 0.4 },
+      { identifier: "conquest:wild_basil", count: 5, scale: 1 }, // or wild_basil // lavender
+      { identifier: "conquest:cross_leaved_heath", count: 5, scale: 1 },
+      { identifier: "conquest:greater_wood_rush", count: 100, scale: 0.6 },
+      { identifier: "conquest:timothy_grass", count: 100, scale: 0.4 },
+      { identifier: "conquest:wormwood", count: 100, scale: 0.4 },
+      { identifier: "conquest:buttercups", count: 10, scale: 0.1 },
+    ],
+    thickness: 2,
+    scale: 1,
+  }),
+  plantsDesert: createGroundCoverLayer({
+    name: "plants_desert",
+    materials: [
+      { identifier: "conquest:dead_grass", count: 100, scale: 0.4 },
+      { identifier: "conquest:sheeps_fescue", count: 100, scale: 0.4 },
+      { identifier: "conquest:small_fescue", count: 100, scale: 0.4 },
+      { identifier: "conquest:meadow_fescue", count: 100, scale: 0.4 },
+      { identifier: "conquest:dense_headed_feathergrass", count: 100, scale: 0.4 },
+      { identifier: "conquest:cut_wheat_shafts", count: 100, scale: 0.4 },
+      { identifier: "conquest:warped_fungus", count: 100, scale: 0.4 },
+      { identifier: "conquest:small_fescue", count: 100, scale: 0.4 },
+      { identifier: "conquest:marsh_ragwort", count: 10, scale: 0.4 },
+      { identifier: "conquest:mediterranean_wild_tulip", count: 10, scale: 0.4 },
+      { identifier: "conquest:green_spurge", count: 10, scale: 0.4 },
+      { identifier: "conquest:yellow_wolfs_bane", count: 10, scale: 0.4 },
+    ],
+    thickness: 2,
+    scale: 1.5,
+  }),
+  plantsTaiga: createGroundCoverLayer({
+    name: "plants_taiga",
+    materials: [
+      { identifier: "conquest:large_fern_1", count: 20, scale: 0.3 },
+      { identifier: "conquest:large_fern_2", count: 20, scale: 0.3 },
+      { identifier: "conquest:large_fern_3", count: 20, scale: 0.3 },
+      { identifier: "conquest:fern", count: 50, scale: 0.3 },
+      { identifier: "conquest:fern_1", count: 50, scale: 0.3 },
+      { identifier: "conquest:fern_2", count: 50, scale: 0.3 },
+      { identifier: "conquest:harts_tongue_fern", count: 100, scale: 0.4 },
+      { identifier: "conquest:common_cow_wheat", count: 100, scale: 0.4 },
+      { identifier: "conquest:broom_bush", count: 100, scale: 0.4 },
+      { identifier: "conquest:wild_overgrown_nettles", count: 20, scale: 0.1 },
+      { identifier: "conquest:bracken", count: 10, scale: 0.3 },
+      { identifier: "conquest:autumnal_bracken", count: 10, scale: 0.3 },
+      { identifier: "conquest:dark_autumnal_bracken", count: 10, scale: 0.3 },
+    ],
+    thickness: 2,
+    scale: 2,
+  }),
+  plantsGrove: createGroundCoverLayer({
+    name: "plants_grove",
+    materials: [
+      //{ identifier: "conquest:greater_wood_rush", count: 100, scale: 0.6 },
+      { identifier: "conquest:wild_shrub", count: 100, scale: 0.6 },
+      { identifier: "conquest:dark_wild_shrub", count: 100, scale: 0.6 },
+      { identifier: "conquest:light_wild_shrub", count: 100, scale: 0.6 },
+      //{ identifier: "conquest:timothy_grass", count: 100, scale: 0.4 },
+      //{ identifier: "conquest:wormwood", count: 100, scale: 0.4 },
+      { identifier: "conquest:lavender", count: 10, scale: 0.7 },
+    ],
+    thickness: 2,
+    scale: 2,
+  }),
+  /*
   plantsPlains: createGroundCoverLayer({
     name: "plants_plains",
     materials: [{ identifier: "conquest:kentucky_bluegrass", count: 1000 }],
     thickness: 2,
   }),
+  plantsDesert: createGroundCoverLayer({
+    name: "plants_desert",
+    materials: [{ identifier: "conquest:dead_grass", count: 100 }],
+    thickness: 2,
+  }),
+  plantsTaiga: createGroundCoverLayer({
+    name: "plants_taiga",
+    materials: [{ identifier: "conquest:wood_horsetail", count: 3 }],
+    thickness: 2,
+  }),
+  plantsGrove: createGroundCoverLayer({
+    name: "plants_grove",
+    materials: [{ identifier: "conquest:greater_wood_rush", count: 500 }],
+    thickness: 2,
+  }),
+  */
   /*
   plantsPlains: createGroundCoverLayer({
     name: "plants_plains",
@@ -261,13 +351,6 @@ conquest:
     thickness: 2,
     scale: 1,
   }),
-  */
-  plantsDesert: createGroundCoverLayer({
-    name: "plants_desert",
-    materials: [{ identifier: "conquest:dead_grass", count: 100 }],
-    thickness: 2,
-  }),
-  /*
   plantsDesert: createGroundCoverLayer({
     name: "plants_desert",
     materials: [
@@ -284,13 +367,6 @@ conquest:
     thickness: 2,
     scale: 1,
   }),
-  */
-  plantsTaiga: createGroundCoverLayer({
-    name: "plants_taiga",
-    materials: [{ identifier: "conquest:wood_horsetail", count: 3 }],
-    thickness: 2,
-  }),
-  /*
   plantsTaiga: createGroundCoverLayer({
     name: "plants_taiga",
     materials: [
@@ -307,13 +383,6 @@ conquest:
     thickness: 2,
     scale: 1,
   }),
-  */
-  plantsGrove: createGroundCoverLayer({
-    name: "plants_grove",
-    materials: [{ identifier: "conquest:greater_wood_rush", count: 500 }],
-    thickness: 2,
-  }),
-  /*
   plantsGrove: createGroundCoverLayer({
     name: "plants_grove",
     materials: [
@@ -364,7 +433,7 @@ conquest:
   beachBottom: createGroundCoverLayer({
     name: "brown_sand",
     materials: [{ identifier: "conquest:brown_sand_layer" }],
-    waterlogged: true,
+    //waterlogged: true,
   }),
   snowyGraniteSlab: createGroundCoverLayer({
     name: "snowy_granite_slab",

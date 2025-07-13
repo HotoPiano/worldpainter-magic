@@ -43,7 +43,9 @@ export const spaceForTree = (x: number, y: number) => {
   loopOffset(x, y, 3, 1, (x2, y2) => {
     if (
       space &&
-      (dimension.getLayerValueAt(customObjectLayers.oliveTrees, x2, y2) || dimension.getLayerValueAt(customObjectLayers.larchTrees, x2, y2))
+      (dimension.getLayerValueAt(customObjectLayers.oliveTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.larchTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2))
     ) {
       space = false;
     }
