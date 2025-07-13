@@ -48,15 +48,12 @@ export const loopCoordinates = (func: (x: number, y: number, tileNumber: number)
 
 export const loopCoordinates = (func: (x: number, y: number, tileNumber: number) => any, name?: string, withoutLogging?: boolean) => {
   const dateStart = new Date();
-  let previousPercentage = 0;
+  let previousPercentage = -1;
   let tileNumber = 0;
-  let tileXNumber = 0;
   for (let x = xStartTile; x < xEndTile; x++) {
-    tileXNumber++;
-
     if (!withoutLogging) {
-      //log(x - xStartTile, xEndTile - xStartTile);
-      const percentage = Math.round(((x - xStartTile) * 100) / (xEndTile - xStartTile));
+      const percentage = Math.round(((x - xStartTile) * 100) / (xEndTile - 1 - xStartTile));
+      //log(x, xEndTile); siste 161 / 162 blir 94%...
       if (percentage > previousPercentage) {
         previousPercentage = percentage;
         const tileNumberLength = (tileWidth * tileHeight).toString().length;

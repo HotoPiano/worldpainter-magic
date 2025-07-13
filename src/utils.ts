@@ -1,6 +1,7 @@
 import dimension from "./dimension";
 import log from "./log";
-import { loopCoordinates } from "./mapDimensions";
+import { loopCoordinates, loopOffset } from "./mapDimensions";
+import customObjectLayers from "./palettes/conquest/1/customObjectLayers";
 
 export function raiseAll(value: number) {
   loopCoordinates(
@@ -36,3 +37,16 @@ export function isWaterlogged(floodedCountZero: number, waterLevel: number, heig
   }
   return { waterloggedLayer, waterloggedTopLayer };
 }
+
+export const spaceForTree = (x: number, y: number) => {
+  let space = true;
+  loopOffset(x, y, 3, 1, (x2, y2) => {
+    if (
+      space &&
+      (dimension.getLayerValueAt(customObjectLayers.oliveTrees, x2, y2) || dimension.getLayerValueAt(customObjectLayers.larchTrees, x2, y2))
+    ) {
+      space = false;
+    }
+  });
+  return space;
+};

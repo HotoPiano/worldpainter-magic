@@ -151,6 +151,9 @@ type TerrainProps = {
 };
 
 export function createTerrain({ name, materials, scale }: TerrainProps) {
+  //colour += colour < 1000 ? 100000 : 100;
+  //colour += colour < 1000 ? 10000 : 10;
+  colour += colour < 100 ? 100 : 10;
   const mixedMaterialRows = materials.map(({ identifier, count = 10, scale = 1 }) => {
     const identity = new org.pepsoft.minecraft.Material.Identity(identifier, null);
     let material = org.pepsoft.minecraft.Material.get(identity);
@@ -167,7 +170,6 @@ export function createTerrain({ name, materials, scale }: TerrainProps) {
   //log("mixedMaterial terrain getMode", mixedMaterial.getMode(), mixedMaterial.getName());
   let customTerrainIndex = wp.installCustomTerrain(mixedMaterial).toWorld(world).go(); //.inSlot(1) after toWorld()
   const ground = org.pepsoft.worldpainter.Terrain.VALUES[fixIndex(customTerrainIndex)];
-  colour += 10000;
   //colour++;
   return ground;
 }

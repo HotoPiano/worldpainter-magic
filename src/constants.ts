@@ -23,6 +23,7 @@ export const BIOMES = {
   DESERT: 2,
   TAIGA: 15,
   BEACH: 16,
+  GROVE: 250,
   SAVANNA: 35,
   BIOME_OLD_GROWTH_PINE_TAIGA: 32, // use instead of taiga if i go for ardacraft
   FROZEN_PEAKS: 249,
@@ -30,11 +31,11 @@ export const BIOMES = {
 };
 
 export const JAVA_COLORS = [
-  java.awt.Color.BLACK,
+  //java.awt.Color.BLACK,
   java.awt.Color.BLUE,
   java.awt.Color.CYAN,
-  java.awt.Color.DARK_GRAY,
-  java.awt.Color.GRAY,
+  //java.awt.Color.DARK_GRAY,
+  //java.awt.Color.GRAY,
   java.awt.Color.GREEN,
   java.awt.Color.LIGHT_GRAY,
   java.awt.Color.MAGENTA,
