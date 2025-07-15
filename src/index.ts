@@ -578,8 +578,9 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
       }
     }
 
-    // random dead bush
-    if (block.treeLayer == null && slope < MOUNTAIN_EDGE_SLOPE && getRandomNumber(1, 1000) === 1) {
+    // random dead bush (500-1200 chance)
+    const randomDeadBushChance = Math.max(500, 1200 - Math.round(slope * 1000));
+    if (block.treeLayer == null && slope < MOUNTAIN_EDGE_SLOPE && getRandomNumber(1, randomDeadBushChance) === 1) {
       block.treeLayer = customObjectLayers.bushesDead;
     }
   }

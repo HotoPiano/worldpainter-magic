@@ -21,7 +21,7 @@ type MaterialParams = {
    */
   random?: number;
   /**
-   * starts at 1
+   * starts at sometimes 0, sometimes 1
    */
   height?: number;
 };
