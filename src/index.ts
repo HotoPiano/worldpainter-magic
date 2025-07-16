@@ -84,7 +84,13 @@ const doRest = () => {
     }
 
     const height = dimension.getHeightAt(x, y);
-    const addedSlope = height / HEIGHEST_HEIGHT / 2 - 0.2;
+    /// 1000 / 2000 / 2 = 0.25
+    /// 2000 / 2000 / 2 = 0.5
+    //const addedSlope = height / HEIGHEST_HEIGHT / 2 - 0.2;
+    //const actualSlope = dimension.getSlope(x, y);
+    /// 500 / 2000 / 2 = 0.5 - 0.8 = -0.675
+    /// 2000 / 2000 / 2 = 0.5 - 0.8 = -0.3
+    const addedSlope = height / HEIGHEST_HEIGHT / 2 - 0.5;
     const actualSlope = dimension.getSlope(x, y);
     const slope = actualSlope + addedSlope;
     const waterLevel = dimension.getWaterLevelAt(x, y);
@@ -105,7 +111,7 @@ const doRest = () => {
       if (block.layer == null) block.layer = slope > 0.2 ? layers.beachStone : layers.lakebed;
       if (block.topLayer == null) {
         if (getRandomNumber(0, 5) == 0) block.topLayer = layers.rocksDark;
-        if (slope > 0.2) block.topLayer = layers.plantsCoastalWaterlogged;
+        else if (slope > 0.2) block.topLayer = layers.plantsCoastalWaterlogged;
       }
     }
 
