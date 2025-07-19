@@ -3,7 +3,11 @@ import { createTerrain } from "../../generator";
 const terrains = {
   ground: createTerrain({
     name: "ground",
-    materials: [{ identifier: "conquest:porous_andesite", count: 10, scale: 1 }],
+    materials: [
+      //{ identifier: "conquest:porous_andesite", count: 10, scale: 1, },
+      { identifier: "conquest:green_sphagnum_moss_block", count: 500, scale: 1 },
+      { identifier: "conquest:brown_sphagnum_moss_block", count: 500, scale: 1 },
+    ],
   }),
   seabed: createTerrain({
     name: "seabed",

@@ -38,17 +38,84 @@ export function isWaterlogged(floodedCountZero: number, waterLevel: number, heig
   return { waterloggedLayer, waterloggedTopLayer };
 }
 
-export const spaceForTree = (x: number, y: number) => {
+export const spaceForTree = (x: number, y: number, thinTree?: boolean) => {
   let space = true;
-  loopOffset(x, y, 3, 1, (x2, y2) => {
+  if (thinTree) {
+    loopOffset(x, y, 3, 1, (x2, y2) => {
+      // thintree beside other thin tree we allow all non matching parallell placements
+      if (x2 != x && y2 != y) {
+        if (
+          dimension.getLayerValueAt(customObjectLayers.larchTreesTall, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2)
+        ) {
+          return;
+          // allow placement at outer edges that is not parallell to both x and y
+        } else if (x2 - x > 2 || x2 - x < -2 || y2 - y > 2 || y2 - y < -2) {
+          return;
+        }
+      }
+
+      if (
+        space &&
+        (dimension.getLayerValueAt(customObjectLayers.oliveTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.poplarTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.gorseTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.larchTreesTall, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2))
+      ) {
+        space = false;
+      }
+    });
+  } else {
+    loopOffset(x, y, 3, 1, (x2, y2) => {
+      // allow placement at outer edges that is not parallell to both x and y
+      if (x2 != x && y2 != y) {
+        if (x2 - x > 2 || x2 - x < -2 || y2 - y > 2 || y2 - y < -2) {
+          return;
+        }
+      }
+
+      if (
+        space &&
+        (dimension.getLayerValueAt(customObjectLayers.oliveTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.poplarTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.gorseTrees, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.larchTreesTall, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2))
+      ) {
+        space = false;
+      }
+    });
+  }
+
+  return space;
+};
+
+/*
+    if (x2 == x || y2 == y) {
+      if (
+        space &&
+        (dimension.getLayerValueAt(customObjectLayers.larchTreesTall, x2, y2) ||
+          dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2))
+      ) {
+        space = false;
+      }
+    }
+
     if (
       space &&
       (dimension.getLayerValueAt(customObjectLayers.oliveTrees, x2, y2) ||
-        dimension.getLayerValueAt(customObjectLayers.larchTrees, x2, y2) ||
-        dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2))
+        dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.poplarTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.gorseTrees, x2, y2))
+      // || dimension.getLayerValueAt(customObjectLayers.larchTreesTall, x2, y2)
+      // || dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2)
     ) {
       space = false;
     }
-  });
-  return space;
-};
+    */

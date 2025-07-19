@@ -10,7 +10,11 @@ const customObjectLayers = {
   beechBushes: loadLayerFromFile("beech_bushes.layer"),
   oliveTrees: loadLayerFromFile("olive_trees.layer"),
   larchTrees: loadLayerFromFile("larch_trees.layer"),
+  larchTreesTall: loadLayerFromFile("larch_trees_tall.layer"),
+  poplarTrees: loadLayerFromFile("poplar_trees.layer"),
+  aspenTrees: loadLayerFromFile("aspen_trees.layer"),
   spruceTrees: loadLayerFromFile("spruce_trees.layer"),
+  gorseTrees: loadLayerFromFile("gorse_trees.layer"),
 };
 
 function loadLayerFromFile(file: string) {

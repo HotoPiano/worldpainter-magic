@@ -116,39 +116,6 @@ export function createGroundCoverLayer2({
   return groundCoverLayer;
 }
 
-//const layer1 = wp.getLayer().fromFile("C:/Users/HoTo/AppData/Roaming/WorldPainter/layers_and_terrains/plants_basic.layer").go();
-//log(layer1.getName());
-
-/*
-const identity1 = new org.pepsoft.minecraft.Material.Identity("conquest:mossy_soil_slab", null);
-const identity2 = new org.pepsoft.minecraft.Material.Identity("conquest:grass_block_layer", null);
-const material1 = org.pepsoft.minecraft.Material.get(identity1).withProperty("layers", "8");
-const material2 = org.pepsoft.minecraft.Material.get(identity2).withProperty("layers", "8");
-const materialRow1 = new org.pepsoft.worldpainter.MixedMaterial.Row(material1, 10, 100);
-const materialRow2 = new org.pepsoft.worldpainter.MixedMaterial.Row(material2, 10, 100);
-const mixedMaterial = new org.pepsoft.worldpainter.MixedMaterial("test", [materialRow1, materialRow2], -1, 1);
-export const groundCoverLayer = new org.pepsoft.worldpainter.layers.groundcover.GroundCoverLayer(
-  "ground",
-  mixedMaterial,
-  java.awt.Color.GREEN
-);
-groundCoverLayer.setSmooth(true);
-*/
-/*
-function y() {
-  const identity1 = new org.pepsoft.minecraft.Material.Identity("conquest:mossy_soil_slab", null);
-  const identity2 = new org.pepsoft.minecraft.Material.Identity("conquest:grass_block_layer", null);
-  const material1 = org.pepsoft.minecraft.Material.get(identity1).withProperty("layers", "8");
-  const material2 = org.pepsoft.minecraft.Material.get(identity2).withProperty("layers", "8");
-  const materialRow1 = new org.pepsoft.worldpainter.MixedMaterial.Row(material1, 10, 100);
-  const materialRow2 = new org.pepsoft.worldpainter.MixedMaterial.Row(material2, 10, 100);
-  const mixedMaterial = new org.pepsoft.worldpainter.MixedMaterial("test", [materialRow1, materialRow2], -1, 1);
-  const groundCoverLayer = new org.pepsoft.worldpainter.layers.groundcover.GroundCoverLayer("ground", mixedMaterial, java.awt.Color.GREEN);
-  groundCoverLayer.setSmooth(true);
-  return groundCoverLayer;
-}
-*/
-
 type TerrainProps = {
   name: string;
   materials: MaterialParams[];
@@ -205,28 +172,3 @@ function fixIndex(int: number) {
     }
   }
 }
-
-/*
-import dimension from "../dimension";
-import log from "../log";
-import { loopCoordinates } from "../mapDimensions";
-import world from "../world";
-
-const groundMaterial1 = org.pepsoft.minecraft.Material.get(new org.pepsoft.minecraft.Material.Identity("minecraft:grass_block", null));
-const groundMaterial2 = org.pepsoft.minecraft.Material.get(new org.pepsoft.minecraft.Material.Identity("conquest:mossy_soil", null));
-const groundMaterialRow1 = new org.pepsoft.worldpainter.MixedMaterial.Row(groundMaterial1, 10, 100);
-const groundMaterialRow2 = new org.pepsoft.worldpainter.MixedMaterial.Row(groundMaterial2, 10, 100);
-
-const mixedMaterialTerrainGround1 = new org.pepsoft.worldpainter.MixedMaterial("test2", [groundMaterialRow1, groundMaterialRow2], -1, 1);
-
-let customTerrainIndex = wp
-  .installCustomTerrain(mixedMaterialTerrainGround1)
-  .toWorld(world) //.inSlot(1)
-  .go();
-
-const ground = org.pepsoft.worldpainter.Terrain.VALUES[fixIndex(customTerrainIndex)];
-
-export const terrains = {
-  ground,
-};
-*/
