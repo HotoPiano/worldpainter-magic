@@ -127,3 +127,10 @@ export const getSteeperNeighbours = (x: number, y: number, height: number, rando
   });
   return steeperNeighbours;
 };
+
+export const getRandomBlockNeighbour = (x: number, y: number) => {
+  return {
+    x: x + (getRandomNumber(1, 2) == 1 ? -1 : 1),
+    y: y + (getRandomNumber(1, 2) == 1 ? -1 : 1),
+  };
+};

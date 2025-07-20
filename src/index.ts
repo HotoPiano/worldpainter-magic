@@ -5,7 +5,7 @@ import log from "./log";
 import world, { exportWorld, saveWorld } from "./world";
 import dimension from "./dimension";
 import { endX, endY, loopCoordinates, loopOffset, mapHeight, mapWidth, startX, startY } from "./mapDimensions";
-import { getRandomNumber, getSteeperNeighbours, isWaterlogged, raiseAll, spaceForTree } from "./utils";
+import { getRandomBlockNeighbour, getRandomNumber, getSteeperNeighbours, isWaterlogged, raiseAll, spaceForTree } from "./utils";
 import { BIOMES, MAX_TREE_SPAWN_RATE } from "./constants";
 import { customObjectLayers, layers, terrains } from "./palettes/currentPalette";
 
@@ -104,8 +104,6 @@ const doRest = () => {
     if (willDoMountains) doMountains(block, enviroment);
     if (willDoSurfaceFoliage) doSurfaceFoliage(block, enviroment);
 
-    const { waterloggedLayer, waterloggedTopLayer } = isWaterlogged(floodedCountZero, waterLevel, height);
-
     // random dead bush (430-1200 chance)
     if (!didSetSnow && block.treeLayer == null && slope < MOUNTAIN_EDGE_SLOPE) {
       const randomDeadBushChance = Math.max(430, 1200 - Math.round(slope * 1000));
@@ -113,7 +111,7 @@ const doRest = () => {
       if (getRandomNumber(1, randomDeadBushChance) === 1) block.treeLayer = customObjectLayers.bushesDead;
     }
 
-    // some leftover lakebed layers and foliage that was not covered from coastline operation
+    // deep water layers and foliage that was not covered from coastline operation
     if (floodedCountZero > 0) {
       if (block.terrain == null) block.terrain = terrains.seabed;
       if (block.layer == null) block.layer = slope > 0.2 ? layers.beachStone : layers.lakebed;
@@ -123,16 +121,34 @@ const doRest = () => {
       }
     }
 
+    // some random leaves
+    const canPlaceRandomLeaves =
+      floodedCountZero > 0 &&
+      !didSetSnow &&
+      slope < MOUNTAIN_EDGE_SLOPE &&
+      block.treeLayer == null &&
+      height % 1 >= 0.3 &&
+      height % 1 < 0.4 &&
+      getRandomNumber(1, 10) == 1;
+    if (canPlaceRandomLeaves) {
+      if (block.biome == BIOMES.BIOME_OLD_GROWTH_PINE_TAIGA) block.topLayer = layers.leavesTaiga;
+      else if (block.biome == BIOMES.GROVE) block.topLayer = layers.leavesGrove;
+      else if (block.biome == BIOMES.FROZEN_PEAKS) block.topLayer = layers.leavesFrozenPlains;
+      else if (block.biome == null) block.topLayer = layers.leavesPlains;
+    }
+
     // setting the actual terrains + layers of the chosen biome
     if (block.terrain == null) block.terrain = terrains.ground;
     if (block.layer == null) {
       if (block.biome == BIOMES.DESERT) block.layer = layers.groundDesert;
       else if (block.biome == BIOMES.BIOME_OLD_GROWTH_PINE_TAIGA) block.layer = layers.groundTaiga;
       else if (block.biome == BIOMES.GROVE) block.layer = layers.groundGrove;
-      //if (biome === BIOMES.TAIGA) layer = layers.groundTaiga;
-      //if (biome === BIOMES.DEEP_FROZEN_OCEAN) layer = layers.groundTaiga;
       else block.layer = layers.groundPlains;
     }
+
+    // TODO ? treeline is pretty hard right now, no smooth transition
+
+    const { waterloggedLayer, waterloggedTopLayer } = isWaterlogged(floodedCountZero, waterLevel, height);
 
     // always placing terrain and layer
     dimension.setBitLayerValueAt(waterloggedLayer ? block.layer.waterlogged : block.layer.normal, x, y, true);
@@ -625,77 +641,21 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
 
   if (block.treeLayer == null && block.biome == null) {
     if (slope > 0.5 && slope < 0.7 && getRandomNumber(1, 8) == 1) {
-      //block.treeLayer = customObjectLayers.bushesDeadThick;
+      //block.treeLayer = customObjectLayers.bushesDeadThick; // not preparing block.treeLayer because that one is not placed when slope > 0.5
       dimension.setLayerValueAt(customObjectLayers.bushesDeadThick, x, y, MAX_TREE_SPAWN_RATE);
 
-      //if (getRandomNumber(1, 2) == 1) {
-      const extraLeavesX = x + (getRandomNumber(1, 2) == 1 ? -1 : 1);
-      const extraLeavesY = y + (getRandomNumber(1, 2) == 1 ? -1 : 1);
-      const slope2 = dimension.getSlope(extraLeavesX, extraLeavesY);
+      const { x: extraLeavesX, y: extraLeavesY } = getRandomBlockNeighbour(x, y);
+      dimension.setBitLayerValueAt(layers.rowanLeaves.normal, extraLeavesX, extraLeavesY, true);
 
-      //const height2 = dimension.getHeightAt(extraLeavesX, extraLeavesY);
-      //if (height2 % 1 >= 0.5 && height2 % 1 < 0.52) {
-      //if (height2 % 1 >= 0 && height2 % 1 < 0.2) {
-      if (slope2 < MOUNTAIN_EDGE_SLOPE) {
-        dimension.setBitLayerValueAt(layers.rowanLeaves.normal, extraLeavesX, extraLeavesY, true);
+      /*
+      if (getRandomNumber(1, 2) == 1) {
+        const slope2 = dimension.getSlope(extraLeavesX, extraLeavesY);
+        if (slope2 < MOUNTAIN_EDGE_SLOPE) {
+          dimension.setBitLayerValueAt(layers.rowanLeaves.normal, extraLeavesX, extraLeavesY, true);
+        }
       }
-    } /*else if (height % 1 >= 0.3 && height % 1 < 0.4 && getRandomNumber(1, 2) == 1) {
-      // height % 1 >= 0.2 && height % 1 < 0.3
-      block.topLayer = layers.rowanLeaves;
-    }*/
-    //}
-    /*
-        loopOffset(x, y, 1, (x2, y2) => {
-          if (x2 == x || y2 == y) return;
-
-          const height2 = dimension.getHeightAt(x2, x2);
-          const slope2 = dimension.getSlope(x2, x2);
-          //if (height2 % 1 >= 0.5 && height2 % 1 < 0.52) {
-          //if (height2 % 1 >= 0 && height2 % 1 < 0.2) {
-          if (height2 % 1 >= 0.7 && height2 % 1 < 0.9 && slope2 < mountainEdgeSlope) {
-            dimension.setBitLayerValueAt(layers.rowanLeaves, x2, y2, true);
-            return true;
-          }
-        });
-        */
-  } else {
-    /*
-        if (
-          //height === Math.floor(height) &&
-          //getRandomNumber(1, 3) != 3 &&
-          // at flat blocks, but 0.5 because foliage is placed while map is lowered 0.5
-          //(height % 1 >= 0.5 &&
-          //  height % 1 < 0.52 &&
-          (height % 1 >= 0.5 &&
-            height % 1 < 0.52 &&
-            //getRandomNumber(1, 10) == 1 &&
-            // just so not constantly on every flat landscapes
-            slope < mountainEdgeSlope &&
-            slope != 0) ||
-          // merging with thicktrees which is at slope > 0.6 && slope < 0.7
-          (slope >= 0.67 && slope <= 0.71 && getRandomNumber(1, 5) === 1) ||
-          (slope >= 0.59 && slope <= 0.63 && getRandomNumber(1, 5) === 1)
-        ) {
-          topLayer = layers.rowanLeaves;
-        }
-        */
-    /*
-        if (
-          //height === Math.floor(height) &&
-          //getRandomNumber(1, 3) != 3 &&
-          // at flat blocks, but 0.5 because foliage is placed while map is lowered 0.5
-          //(height % 1 >= 0.5 &&
-          //  height % 1 < 0.52 &&
-          height % 1 >= 0.3 &&
-          height % 1 < 0.5 &&
-          //getRandomNumber(1, 10) == 1 &&
-          // just so not constantly on every flat landscapes
-          slope < mountainEdgeSlope &&
-          slope > 0.1
-        ) {
-          topLayer = layers.rowanLeaves;
-        }
-        */
+      */
+    }
   }
 };
 
