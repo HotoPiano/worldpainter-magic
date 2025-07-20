@@ -5,7 +5,7 @@ import log from "./log";
 import world, { exportWorld, saveWorld } from "./world";
 import dimension from "./dimension";
 import { endX, endY, loopCoordinates, loopOffset, mapHeight, mapWidth, startX, startY } from "./mapDimensions";
-import { getRandomNumber, isWaterlogged, raiseAll, spaceForTree } from "./utils";
+import { getRandomNumber, getSteeperNeighbours, isWaterlogged, raiseAll, spaceForTree } from "./utils";
 import { BIOMES, MAX_TREE_SPAWN_RATE } from "./constants";
 import { customObjectLayers, layers, terrains } from "./palettes/currentPalette";
 
@@ -141,7 +141,7 @@ const doRest = () => {
     // optionally placing toplayer (like grass), treelayer, biomelayer
     if (block.topLayer != null && block.treeLayer == null)
       dimension.setBitLayerValueAt(waterloggedTopLayer ? block.topLayer.waterlogged : block.topLayer.normal, x, y, true);
-    if (block.treeLayer != null) dimension.setLayerValueAt(block.treeLayer, x, y, MAX_TREE_SPAWN_RATE);
+    if (block.treeLayer != null && slope < 0.5) dimension.setLayerValueAt(block.treeLayer, x, y, MAX_TREE_SPAWN_RATE);
     if (block.biome != null) dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, block.biome);
   }, "the rest");
 };
@@ -152,6 +152,9 @@ const iterateCoastLine = (x: number, y: number) => {
   coastLineIteration(x, y, x, y, "right", true);
   coastLineIteration(x, y, x, y, "down", true);
 };
+
+const SAND_COAST_MAX_WIDTH = 15;
+const SAVANNA_COAST_MAX_WIDTH = 5;
 
 const coastLineIteration = (
   _x: number,
@@ -168,9 +171,17 @@ const coastLineIteration = (
     if (direction === "right" && !(x > _x && y >= _y)) return;
     if (direction === "down" && !(x <= _x && y > _y)) return;
 
-    const outsideBounds = x < xInitial - 10 || x > xInitial + 10 || y < yInitial - 10 || y > yInitial + 10;
+    const outsideBounds =
+      x < xInitial - SAND_COAST_MAX_WIDTH ||
+      x > xInitial + SAND_COAST_MAX_WIDTH ||
+      y < yInitial - SAND_COAST_MAX_WIDTH ||
+      y > yInitial + SAND_COAST_MAX_WIDTH;
     if (outsideBounds) return;
-    const outsideSavanna = x < xInitial - 5 || x > xInitial + 5 || y < yInitial - 5 || y > yInitial + 5;
+    const outsideSavanna =
+      x < xInitial - SAVANNA_COAST_MAX_WIDTH ||
+      x > xInitial + SAVANNA_COAST_MAX_WIDTH ||
+      y < yInitial - SAVANNA_COAST_MAX_WIDTH ||
+      y > yInitial + SAVANNA_COAST_MAX_WIDTH;
 
     // if already checked, go to next iteration
     if (dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y) != 255) {
@@ -208,8 +219,15 @@ const coastLineIteration = (
       let terrain: any = null;
       let biome: any = null;
 
+      /*
       const floodedCountTen = dimension.getFloodedCount(x, y, 10, false);
+      //const doSand = canDoSand && slope < floodedCountTen / 1800;
       const doSand = canDoSand && slope < floodedCountTen / 1800;
+      */
+      const floodedCountTen = dimension.getFloodedCount(x, y, SAND_COAST_MAX_WIDTH, false);
+      //const doSand = canDoSand && slope < floodedCountTen / 1800;
+      const doSand = canDoSand && slope < floodedCountTen / (140 * SAND_COAST_MAX_WIDTH);
+
       //const doDesertBiome = slope < floodedCountTen / 1400;
 
       const { waterloggedLayer, waterloggedTopLayer } = isWaterlogged(floodedCountZero, waterLevel, height);
@@ -440,8 +458,7 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
   let steeperNeighbours = 0;
   let sameAsNeighBours = 0;
 
-  // desert + olive trees
-  let randomDistance = getRandomNumber(30, 70); // 40,60 (20.06.2025)
+  let randomDistance = getRandomNumber(44, 56); //50; //getRandomNumber(30, 70); // 40,60 (20.06.2025)
   loopOffset(x, y, randomDistance, randomDistance, (x2, y2) => {
     if (x === x2 && y === y2) return;
     const height2 = dimension.getHeightAt(x2, y2);
@@ -449,28 +466,17 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
     if (height2 < height + 10 && height2 > height - 10) sameAsNeighBours++;
   });
 
-  // desert + goatWillowBushes
-  if (sameAsNeighBours > 6 && slope < 0.4) {
-    // was (sameAsNeighBours > 7 && slope < 0.1) 0.1 21.06.2025
-    block.biome = BIOMES.DESERT;
-    block.topLayer = layers.plantsDesert;
-
-    if (getRandomNumber(1, 32) == 1 && slope > 0.2) {
-      block.treeLayer = customObjectLayers.goatWillowBushes;
-    }
-  }
-
   // larch trees, and some rocks
-  if (sameAsNeighBours >= 6 && sameAsNeighBours <= 7 && slope < 0.1) {
+  if (
+    sameAsNeighBours >= 4 &&
+    sameAsNeighBours <= 6 //&& slope < 0.1
+    //sameAsNeighBours >= 6 &&
+    //sameAsNeighBours <= 7 //&& slope < 0.1
+  ) {
     if (getRandomNumber(1, 16) == 1) {
-      let steeperNeighbours2 = 0;
-      loopOffset(x, y, randomDistance * 4, randomDistance * 4, (x2, y2) => {
-        if (x === x2 && y === y2) return;
-        const height2 = dimension.getHeightAt(x2, y2);
-        if (height2 - 10 > height) steeperNeighbours2++;
-      });
-
-      if (steeperNeighbours2 == 2) {
+      let steeperNeighbours4 = getSteeperNeighbours(x, y, height, randomDistance, 4);
+      // steeperNeighbours2 == 2
+      if (steeperNeighbours4 > 0 && steeperNeighbours4 < 3) {
         // trying to place tree
         const randomNumber = getRandomNumber(1, 4);
         if (randomNumber == 1) {
@@ -482,7 +488,7 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
             block.treeLayer = customObjectLayers.larchTreesTall;
           }
         }
-      } else if (steeperNeighbours2 > 0 && steeperNeighbours2 < 3) {
+      } else if (steeperNeighbours4 > 0 && steeperNeighbours4 < 3) {
         if (getRandomNumber(1, 4) == 1) {
           block.topLayer = layers.rocks;
         }
@@ -490,36 +496,56 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
     }
   }
 
-  // olive trees, and some rocks
-  if (sameAsNeighBours > 7 && slope < 0.2) {
-    let steeperNeighbours2 = 0;
-    loopOffset(x, y, randomDistance * 2, randomDistance * 2, (x2, y2) => {
-      if (x === x2 && y === y2) return;
-      const height2 = dimension.getHeightAt(x2, y2);
-      if (height2 - 10 > height) steeperNeighbours2++;
-    });
-    // > 2
-    if (steeperNeighbours2 == 2) {
-      // 8
-      if (getRandomNumber(1, 24) == 1) {
-        if (spaceForTree(x, y)) {
-          block.treeLayer = customObjectLayers.oliveTrees;
+  // desert + goatWillowBushes
+  if (
+    sameAsNeighBours > 6 //&& slope < 0.4
+  ) {
+    // was (sameAsNeighBours > 7 && slope < 0.1) 0.1 21.06.2025
+    block.biome = BIOMES.DESERT;
+    block.topLayer = layers.plantsDesert;
+
+    let steeperNeighbours2 = getSteeperNeighbours(x, y, height, randomDistance, 2);
+    if (
+      steeperNeighbours2 == 2 &&
+      getRandomNumber(1, 64) == 1 //&& slope > -0.2
+    ) {
+      block.treeLayer = customObjectLayers.goatWillowBushes;
+    }
+    // olive trees, and some rocks
+    if (
+      sameAsNeighBours > 7 //&& slope < 0.2
+    ) {
+      let steeperNeighbours2 = getSteeperNeighbours(x, y, height, randomDistance, 2);
+      // > 2
+      if (steeperNeighbours2 == 2) {
+        // 8
+        if (getRandomNumber(1, 32) == 1) {
+          if (spaceForTree(x, y)) {
+            block.treeLayer = customObjectLayers.oliveTrees;
+          }
         }
-      }
-      if (block.treeLayer == null && steeperNeighbours2 > 0 && steeperNeighbours2 < 3) {
-        if (getRandomNumber(1, 4) == 1) {
-          block.topLayer = layers.rocks;
+        if (
+          //block.treeLayer == null &&
+          steeperNeighbours2 > 0 &&
+          steeperNeighbours2 < 3
+        ) {
+          if (slope > 0.1 && getRandomNumber(1, 4) == 1) {
+            block.topLayer = layers.rocks;
+          }
         }
       }
     }
   }
 
   // taiga + rowan bushes, and some rocks
-  if (block.treeLayer == null && block.biome == null && steeperNeighbours > 3) {
+  if (block.biome == null && steeperNeighbours > 3) {
     //  && slope < 0.5
     block.biome = BIOMES.BIOME_OLD_GROWTH_PINE_TAIGA;
     block.topLayer = layers.plantsTaiga;
-    if (slope > -0.1 && steeperNeighbours > 4 && slope < 0.5) {
+    if (
+      //slope > -0.1 && slope < 0.5 &&
+      steeperNeighbours > 4
+    ) {
       /*
       const randomNumber = getRandomNumber(1, 24); // 16
 
@@ -542,7 +568,8 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
       } else if (randomNumber < 5) {
         block.topLayer = layers.rocks;
       }
-    } else if (slope > -0.2 && slope < 0.6) {
+    } //if (slope > -0.2 && slope < 0.6)
+    else {
       const randomNumber = getRandomNumber(1, 48); // 16
 
       if (randomNumber == 1) {
@@ -553,33 +580,39 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
     }
   }
 
-  if (block.treeLayer == null && block.biome == null && steeperNeighbours == 2) {
+  // grove, with poplar/spruce trees and beech bushes
+  if (block.biome == null && (steeperNeighbours == 2 || steeperNeighbours == 4)) {
     block.biome = BIOMES.GROVE;
     block.topLayer = layers.plantsGrove;
-    if (slope > 0.1 && slope < 0.4) {
-      let steeperNeighbours2 = 0;
-      loopOffset(x, y, randomDistance * 4, randomDistance * 4, (x2, y2) => {
-        if (x === x2 && y === y2) return;
-        const height2 = dimension.getHeightAt(x2, y2);
-        if (height2 - 10 > height) steeperNeighbours2++;
-      });
-      if (steeperNeighbours2 > 3) {
-        if (getRandomNumber(1, 16) == 1) {
-          const randomNumber = getRandomNumber(1, 4);
-          if (randomNumber === 1) {
-            if (spaceForTree(x, y)) {
-              block.treeLayer = customObjectLayers.poplarTrees;
-            }
-          } else {
-            if (spaceForTree(x, y)) {
-              block.treeLayer = customObjectLayers.spruceTrees;
-            }
+    //if (slope > 0.3 && slope < 0.6) {
+    //if (slope > 0.1 && slope < 0.4) {
+    //if (block.treeLayer == null) {
+    const steeperNeighbours4 = getSteeperNeighbours(x, y, height, randomDistance, 4);
+    // > 3
+    if (steeperNeighbours4 > 2) {
+      if (getRandomNumber(1, 16) == 1) {
+        const randomNumber = getRandomNumber(1, 4);
+        if (randomNumber === 1) {
+          if (spaceForTree(x, y)) {
+            block.treeLayer = customObjectLayers.poplarTrees;
           }
-        } else if (getRandomNumber(1, 16) == 1 && slope > 0.2 && slope < 0.3) {
-          block.treeLayer = customObjectLayers.beechBushes;
+        } else {
+          if (spaceForTree(x, y, true)) {
+            block.treeLayer = customObjectLayers.spruceTrees;
+          }
         }
+      } else if (
+        getRandomNumber(1, 32) == 1 //&& slope > 0 && slope < 0.6
+      ) {
+        block.treeLayer = customObjectLayers.beechBushes;
       }
     }
+    //}
+    //}
+    //} else if (block.biome == null && slope > 0 && slope < 0.5) {
+  } else if (block.biome == null && ((slope > 0.3 && slope < 0.5) || (slope > -0.3 && slope < -0.1))) {
+    block.biome = BIOMES.GROVE;
+    block.topLayer = layers.plantsGrove;
   }
 
   /*
@@ -590,24 +623,26 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
   }
   */
 
-  const doThickForest =
-    //slope > 0.3 && slope < 0.4
-    slope > 0.6 && slope < 0.7 && getRandomNumber(1, 8) == 1;
+  if (block.treeLayer == null && block.biome == null) {
+    if (slope > 0.5 && slope < 0.7 && getRandomNumber(1, 8) == 1) {
+      //block.treeLayer = customObjectLayers.bushesDeadThick;
+      dimension.setLayerValueAt(customObjectLayers.bushesDeadThick, x, y, MAX_TREE_SPAWN_RATE);
 
-  if (block.treeLayer == null && block.biome != null && doThickForest) {
-    block.treeLayer = customObjectLayers.bushesDeadThick;
+      //if (getRandomNumber(1, 2) == 1) {
+      const extraLeavesX = x + (getRandomNumber(1, 2) == 1 ? -1 : 1);
+      const extraLeavesY = y + (getRandomNumber(1, 2) == 1 ? -1 : 1);
+      const slope2 = dimension.getSlope(extraLeavesX, extraLeavesY);
 
-    //if (getRandomNumber(1, 2) == 1) {
-    const extraLeavesX = x + (getRandomNumber(1, 2) == 1 ? -1 : 1);
-    const extraLeavesY = y + (getRandomNumber(1, 2) == 1 ? -1 : 1);
-    const slope2 = dimension.getSlope(extraLeavesX, extraLeavesY);
-
-    //const height2 = dimension.getHeightAt(extraLeavesX, extraLeavesY);
-    //if (height2 % 1 >= 0.5 && height2 % 1 < 0.52) {
-    //if (height2 % 1 >= 0 && height2 % 1 < 0.2) {
-    if (slope2 < MOUNTAIN_EDGE_SLOPE) {
-      dimension.setBitLayerValueAt(layers.rowanLeaves.normal, extraLeavesX, extraLeavesY, true);
-    }
+      //const height2 = dimension.getHeightAt(extraLeavesX, extraLeavesY);
+      //if (height2 % 1 >= 0.5 && height2 % 1 < 0.52) {
+      //if (height2 % 1 >= 0 && height2 % 1 < 0.2) {
+      if (slope2 < MOUNTAIN_EDGE_SLOPE) {
+        dimension.setBitLayerValueAt(layers.rowanLeaves.normal, extraLeavesX, extraLeavesY, true);
+      }
+    } /*else if (height % 1 >= 0.3 && height % 1 < 0.4 && getRandomNumber(1, 2) == 1) {
+      // height % 1 >= 0.2 && height % 1 < 0.3
+      block.topLayer = layers.rowanLeaves;
+    }*/
     //}
     /*
         loopOffset(x, y, 1, (x2, y2) => {

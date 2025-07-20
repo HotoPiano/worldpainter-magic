@@ -56,16 +56,14 @@ export const spaceForTree = (x: number, y: number, thinTree?: boolean) => {
       }
 
       if (
-        space &&
-        (dimension.getLayerValueAt(customObjectLayers.oliveTrees, x2, y2) ||
-          dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
-          dimension.getLayerValueAt(customObjectLayers.poplarTrees, x2, y2) ||
-          dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
-          dimension.getLayerValueAt(customObjectLayers.gorseTrees, x2, y2) ||
-          dimension.getLayerValueAt(customObjectLayers.larchTreesTall, x2, y2) ||
-          dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2))
+        dimension.getLayerValueAt(customObjectLayers.oliveTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.poplarTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.gorseTrees, x2, y2)
       ) {
         space = false;
+        return true;
       }
     });
   } else {
@@ -119,3 +117,13 @@ export const spaceForTree = (x: number, y: number, thinTree?: boolean) => {
       space = false;
     }
     */
+
+export const getSteeperNeighbours = (x: number, y: number, height: number, randomDistance: number, distanceMultiplier: number) => {
+  let steeperNeighbours = 0;
+  loopOffset(x, y, randomDistance * distanceMultiplier, randomDistance * distanceMultiplier, (x2, y2) => {
+    if (x === x2 && y === y2) return;
+    const height2 = dimension.getHeightAt(x2, y2);
+    if (height2 - 10 > height) steeperNeighbours++;
+  });
+  return steeperNeighbours;
+};
