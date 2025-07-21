@@ -93,10 +93,17 @@ const doCoastline = () => {
     const waterLevel = dimension.getWaterLevelAt(x, y);
     const floodedCountZero = dimension.getFloodedCount(x, y, 0, false);
 
+    if (slope > MOUNTAIN_EDGE_SLOPE) return;
+
     const block: Block = { layer: null, topLayer: null, treeLayer: null, terrain: null, biome: null };
     //const enviroment: Environment = { addedSlope, floodedCountZero, height, slope, x, y };
 
-    if (existingBiome === BIOMES.SAVANNA) {
+    if (existingBiome === BIOMES.BEACH && floodedCountZero > 0) {
+      //biome = BIOMES.BEACH;
+      block.layer = layers.lakebed;
+      block.topLayer = floodedCountZero > 0 ? layers.plantsCoastalWaterlogged : layers.plantsCoastal;
+      block.terrain = terrains.seabed;
+    } else if (existingBiome === BIOMES.SAVANNA || existingBiome === BIOMES.BEACH) {
       //biome = BIOMES.SAVANNA;
       block.layer = floodedCountZero > 0 ? layers.beachBottom : layers.beachTop;
       block.terrain = terrains.beachBottom;
@@ -107,11 +114,6 @@ const doCoastline = () => {
       if (slope > 0 && slope < 0.2 && getRandomNumber(1, 5) == 5) {
         block.topLayer = layers.rocksBeach;
       }
-    } else if (existingBiome === BIOMES.BEACH) {
-      //biome = BIOMES.BEACH;
-      block.layer = layers.lakebed;
-      block.topLayer = floodedCountZero > 0 ? layers.plantsCoastalWaterlogged : layers.plantsCoastal;
-      block.terrain = terrains.seabed;
     } else {
       return;
     }
@@ -479,13 +481,15 @@ const doSnow = (block: Block, { x, y, addedSlope, floodedCountZero, height, slop
     // snowy granite hvis mindre enn 3 nabosnø blokker?
     const setSnowTerrain = slope < slopeLimit - 0.5;
     if (setSnowTerrain) {
-      //terrain = org.pepsoft.worldpainter.Terrain.DEEP_SNOW;
-      //layer = layers.frostBuiltIn;
-      block.layer = layers.snow;
-      block.terrain = terrains.snowyIcyLimestone;
+      block.terrain = org.pepsoft.worldpainter.Terrain.DEEP_SNOW;
+      block.layer = layers.frostBuiltIn;
+      //block.layer = layers.snow;
+      //block.terrain = terrains.snowyIcyLimestone;
     } else {
-      block.layer = layers.snow;
-      block.terrain = terrains.snowyIcyLimestone;
+      block.terrain = org.pepsoft.worldpainter.Terrain.DEEP_SNOW;
+      block.layer = layers.frostBuiltIn;
+      //block.layer = layers.snow;
+      //block.terrain = terrains.snowyIcyLimestone;
     }
   } else if (setSnowBiome && height < SNOW_BIOME_LIMIT) {
     block.biome = BIOMES.FROZEN_PEAKS;

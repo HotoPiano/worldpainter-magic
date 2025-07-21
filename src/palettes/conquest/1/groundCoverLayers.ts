@@ -251,7 +251,7 @@ conquest:
     thickness: 2,
     persistent: true,
   }),
-  frostBuiltIn: wp.getLayer().withName("Frost").go(),
+  frostBuiltIn: { normal: wp.getLayer().withName("Frost").go(), waterlogged: wp.getLayer().withName("Frost").go() },
   snow: createGroundCoverLayer({
     name: "snow",
     materials: [
