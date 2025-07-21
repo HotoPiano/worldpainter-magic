@@ -206,7 +206,6 @@ conquest:
     thickness: 2,
     persistent: true,
   }),
-  /*
   leavesDesert: createGroundCoverLayer({
     name: "leaves_desert",
     materials: [
@@ -218,7 +217,6 @@ conquest:
     thickness: 2,
     persistent: true,
   }),
-  */
   leavesTaiga: createGroundCoverLayer({
     name: "leaves_taiga",
     materials: [

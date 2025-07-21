@@ -28,6 +28,16 @@ const willDoMountains = true;
 const willDoSurfaceFoliage = true;
 const willShiftHeight = true;
 
+/*
+Object.keys(layers).forEach((key) => {
+  const layer = (layers as any)[key];
+  if (layer.normal != null) {
+    log((layer.normal as any).getName());
+    log((layer.normal as any).getPriority());
+  }
+});
+*/
+
 const performMagic = () => {
   if (willShiftHeight) raiseAll(0.5);
 
@@ -102,7 +112,8 @@ const doRest = () => {
     let didSetSnow = false;
     if (willDoSnow) didSetSnow = doSnow(block, enviroment);
     if (willDoMountains) doMountains(block, enviroment);
-    if (willDoSurfaceFoliage) doSurfaceFoliage(block, enviroment);
+    let placeNeighbourLeaves = false;
+    if (willDoSurfaceFoliage) placeNeighbourLeaves = doSurfaceFoliage(block, enviroment);
 
     // random dead bush (430-1200 chance)
     if (!didSetSnow && block.treeLayer == null && slope < MOUNTAIN_EDGE_SLOPE) {
@@ -116,14 +127,14 @@ const doRest = () => {
       if (block.terrain == null) block.terrain = terrains.seabed;
       if (block.layer == null) block.layer = slope > 0.2 ? layers.beachStone : layers.lakebed;
       if (block.topLayer == null) {
-        if (getRandomNumber(0, 5) == 0) block.topLayer = layers.rocksDark;
+        if (getRandomNumber(1, 6) == 1) block.topLayer = layers.rocksDark;
         else if (slope > 0.2) block.topLayer = layers.plantsCoastalWaterlogged;
       }
     }
 
     // some random leaves
     const canPlaceRandomLeaves =
-      floodedCountZero > 0 &&
+      floodedCountZero == 0 &&
       !didSetSnow &&
       slope < MOUNTAIN_EDGE_SLOPE &&
       block.treeLayer == null &&
@@ -137,6 +148,20 @@ const doRest = () => {
       else if (block.biome == null) block.topLayer = layers.leavesPlains;
     }
 
+    // random leaves by specific bushes
+    if (placeNeighbourLeaves) {
+      const { x: extraLeavesX, y: extraLeavesY } = getRandomBlockNeighbour(x, y);
+
+      let bushLayer = null;
+      if (block.biome == BIOMES.DESERT) bushLayer = layers.leavesDesert;
+      if (block.biome == BIOMES.BIOME_OLD_GROWTH_PINE_TAIGA) bushLayer = layers.leavesTaiga;
+      else if (block.biome == BIOMES.GROVE) bushLayer = layers.leavesGrove;
+      else if (block.biome == BIOMES.FROZEN_PEAKS) bushLayer = layers.leavesFrozenPlains;
+      else if (block.biome == null) bushLayer = layers.leavesPlains;
+
+      if (bushLayer != null) dimension.setBitLayerValueAt(bushLayer.normal, extraLeavesX, extraLeavesY, true);
+    }
+
     // setting the actual terrains + layers of the chosen biome
     if (block.terrain == null) block.terrain = terrains.ground;
     if (block.layer == null) {
@@ -146,7 +171,8 @@ const doRest = () => {
       else block.layer = layers.groundPlains;
     }
 
-    // TODO ? treeline is pretty hard right now, no smooth transition
+    // TODO treeline is pretty hard right now, no smooth transition
+    // TODO sand beach is very square
 
     const { waterloggedLayer, waterloggedTopLayer } = isWaterlogged(floodedCountZero, waterLevel, height);
 
@@ -283,7 +309,7 @@ const coastLineIteration = (
   });
 };
 
-const doSnow = (block: Block, { x, y, addedSlope, floodedCountZero, height, slope }: Environment) => {
+const doSnow = (block: Block, { x, y, addedSlope, floodedCountZero, height, slope }: Environment): boolean => {
   if (floodedCountZero > 0) return false;
 
   let didSetSnow = false;
@@ -439,7 +465,7 @@ const doMountains = (block: Block, { x, y, addedSlope, floodedCountZero, height,
   }
 };
 
-const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, height, slope }: Environment) => {
+const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, height, slope }: Environment): boolean => {
   //if (block.biome == null && floodedCountZero == 0) {}
 
   /*
@@ -450,7 +476,7 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
   }
   */
 
-  if (block.biome != null || floodedCountZero > 0 || slope > MOUNTAIN_EDGE_SLOPE) return;
+  if (block.biome != null || floodedCountZero > 0) return false;
 
   //if (height < SNOW_HEIGHT_LIMIT) biome = BIOMES.DESERT;
 
@@ -463,13 +489,16 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
     block.topLayer = slope > 0.65 && slope <= 0.77 ? layers.rocksDark : layers.rocks;
   }
 
-  if (block.topLayer == null && slope < MOUNTAIN_EDGE_SLOPE) block.topLayer = layers.plantsPlains;
+  if (slope > MOUNTAIN_EDGE_SLOPE) return false;
+
+  if (block.topLayer == null) block.topLayer = layers.plantsPlains;
 
   /*
       if (slope < mountainEdgeSlope && getRandomNumber(1, 100) == 1) {
         treeLayer = customObjectLayers.bushesDeadThick;
       }
       */
+  let placeNeighbourLeaves = false;
 
   let steeperNeighbours = 0;
   let sameAsNeighBours = 0;
@@ -526,6 +555,7 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
       getRandomNumber(1, 64) == 1 //&& slope > -0.2
     ) {
       block.treeLayer = customObjectLayers.goatWillowBushes;
+      placeNeighbourLeaves = true;
     }
     // olive trees, and some rocks
     if (
@@ -545,7 +575,7 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
           steeperNeighbours2 > 0 &&
           steeperNeighbours2 < 3
         ) {
-          if (slope > 0.1 && getRandomNumber(1, 4) == 1) {
+          if (slope - addedSlope > 0.2 && getRandomNumber(1, 4) == 1) {
             block.topLayer = layers.rocks;
           }
         }
@@ -571,7 +601,7 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
         block.topLayer = layers.rocks;
       }
       */
-      const randomNumber = getRandomNumber(1, 64);
+      const randomNumber = getRandomNumber(1, 128);
 
       if (randomNumber == 1) {
         if (spaceForTree(x, y)) {
@@ -586,10 +616,11 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
       }
     } //if (slope > -0.2 && slope < 0.6)
     else {
-      const randomNumber = getRandomNumber(1, 48); // 16
+      const randomNumber = getRandomNumber(1, 64); // 16
 
       if (randomNumber == 1) {
         block.treeLayer = customObjectLayers.bushesRowan;
+        placeNeighbourLeaves = true;
       } else if (randomNumber < 3) {
         block.topLayer = layers.rocks;
       }
@@ -621,6 +652,7 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
         getRandomNumber(1, 32) == 1 //&& slope > 0 && slope < 0.6
       ) {
         block.treeLayer = customObjectLayers.beechBushes;
+        placeNeighbourLeaves = true;
       }
     }
     //}
@@ -657,6 +689,8 @@ const doSurfaceFoliage = (block: Block, { x, y, addedSlope, floodedCountZero, he
       */
     }
   }
+
+  return placeNeighbourLeaves;
 };
 
 // comment both below if wanna only export already fixed map
