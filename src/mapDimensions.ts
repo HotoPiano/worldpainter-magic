@@ -16,36 +16,6 @@ const xEndTile = dimension.getHighestX() + 1;
 const yStartTile = dimension.getLowestY();
 const yEndTile = dimension.getHighestY() + 1;
 
-/*
-export const loopCoordinates = (func: (x: number, y: number, tileNumber: number) => any, name?: string, withoutLogging?: boolean) => {
-  const dateStart = new Date();
-  let percentage = 0;
-  let tileNumber = 0;
-  let tileXNumber = 0;
-  for (let x = xStartTile; x < xEndTile; x++) {
-    tileXNumber++;
-    for (let y = yStartTile; y < yEndTile; y++) {
-      tileNumber++;
-      if (!withoutLogging && y == yStartTile && (tileWidth < 100 || x % Math.round((xEndTile - xStartTile) / 100) == 0)) {
-        const tileNumberLength = (tileWidth * tileHeight).toString().length;
-        const paddedTileNumber = padNumber(tileNumber, tileNumberLength);
-        const percentageText = tileWidth > 100 && " - " + ++percentage + "%";
-        log("iterating tiles for " + name + ": " + (paddedTileNumber + " / (" + TILE_COUNT_TEXT) + ")" + percentageText);
-      }
-      for (let x2 = x * TILESIZE; x2 < x * TILESIZE + TILESIZE; x2++) {
-        for (let y2 = y * TILESIZE; y2 < y * TILESIZE + TILESIZE; y2++) {
-          func(x2, y2, tileNumber);
-        }
-      }
-    }
-  }
-  if (!withoutLogging) {
-    const dateEnd = new Date();
-    log("took " + Math.round((dateEnd.getTime() - dateStart.getTime()) / 1000) + " seconds");
-  }
-};
-*/
-
 export const loopCoordinates = (func: (x: number, y: number, tileNumber: number) => any, name?: string, withoutLogging?: boolean) => {
   const dateStart = new Date();
   let previousPercentage = -1;
@@ -73,7 +43,14 @@ export const loopCoordinates = (func: (x: number, y: number, tileNumber: number)
   }
   if (!withoutLogging) {
     const dateEnd = new Date();
-    log("took " + Math.round((dateEnd.getTime() - dateStart.getTime()) / 1000) + " seconds");
+    const timeMillis = dateEnd.getTime() - dateStart.getTime();
+    const seconds = Math.floor(timeMillis / 1000) % 60;
+    const minutes = Math.floor(timeMillis / 1000 / 60) % 60;
+    const hours = Math.floor(timeMillis / 1000 / 60 / 60);
+    const hoursText = hours > 0 ? hours + " hour" + (hours > 1 ? "s" : "") + ", " : "";
+    const minutesText = minutes > 0 ? minutes + " minute" + (minutes > 1 ? "s" : "") + " and " : "";
+    const secondsText = seconds + " second" + (seconds > 1 ? "s" : "");
+    log("took " + hoursText + minutesText + secondsText); // took 1 hour(s)
   }
 };
 
@@ -104,42 +81,30 @@ export const loopOffset = (x: number, y: number, offset: number, step: number, f
 };
 
 /*
-const TILESIZE = 128;
-export const mapWidth = dimension.getWidth() * TILESIZE;
-export const mapHeight = dimension.getHeight() * TILESIZE;
-export const startX = 128 * dimension.getLowestX();
-export const endX = 128 * (dimension.getHighestX() + 1) - 1;
-export const startY = 128 * dimension.getLowestY();
-export const endY = 128 * (dimension.getHighestY() + 1) - 1;
-
-export const loopCoordinates = (func: (x: number, y: number) => any, withoutLogging?: boolean) => {
-  for (let x = startX; x < endX; x++) {
-    for (let y = startY; y < endY; y++) {
-      if (y == 0 && x % 100 == 0 && !withoutLogging) log("iterating blocks: " + (x + "/" + endX));
-      func(x, y);
-    }
-  }
-};
-
-let percentage = 0;
-//const iterations = (endX - startX) * (endY - startY);
-//let iteration = 0;
-export const loopCoordinates = (func: (x: number, y: number) => any, withoutLogging?: boolean) => {
+export const loopCoordinates = (func: (x: number, y: number, tileNumber: number) => any, name?: string, withoutLogging?: boolean) => {
   const dateStart = new Date();
-  for (let x = startX; x < endX; x++) {
-    for (let y = startY; y < endY; y++) {
-      //iteration++;
-      //if (!withoutLogging && Math.round(iterations / 100) == iteration) log("iterating blocks: " + (x + "/" + endX));
-      //if (y == 0 && x % 100 == 0 && !withoutLogging) log("iterating blocks: " + (x + "/" + endX));
-      if (!withoutLogging && y == startY && x % Math.round(mapWidth / 100) == 0) {
-        percentage++;
-        log("iterating blocks: " + (x + "/" + endX) + " - " + percentage + "%");
+  let percentage = 0;
+  let tileNumber = 0;
+  let tileXNumber = 0;
+  for (let x = xStartTile; x < xEndTile; x++) {
+    tileXNumber++;
+    for (let y = yStartTile; y < yEndTile; y++) {
+      tileNumber++;
+      if (!withoutLogging && y == yStartTile && (tileWidth < 100 || x % Math.round((xEndTile - xStartTile) / 100) == 0)) {
+        const tileNumberLength = (tileWidth * tileHeight).toString().length;
+        const paddedTileNumber = padNumber(tileNumber, tileNumberLength);
+        const percentageText = tileWidth > 100 && " - " + ++percentage + "%";
+        log("iterating tiles for " + name + ": " + (paddedTileNumber + " / (" + TILE_COUNT_TEXT) + ")" + percentageText);
       }
-      func(x, y);
+      for (let x2 = x * TILESIZE; x2 < x * TILESIZE + TILESIZE; x2++) {
+        for (let y2 = y * TILESIZE; y2 < y * TILESIZE + TILESIZE; y2++) {
+          func(x2, y2, tileNumber);
+        }
+      }
     }
   }
-  const dateEnd = new Date();
   if (!withoutLogging) {
+    const dateEnd = new Date();
     log("took " + Math.round((dateEnd.getTime() - dateStart.getTime()) / 1000) + " seconds");
   }
 };

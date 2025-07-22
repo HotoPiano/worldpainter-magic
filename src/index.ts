@@ -79,7 +79,7 @@ const doCoastline = () => {
         iterateCoastLine(x, y);
       }
     }
-  }, "coastline");
+  }, "coastline biome");
 
   loopCoordinates((x, y) => {
     const existingBiome = dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y);
@@ -129,7 +129,7 @@ const doCoastline = () => {
       dimension.setBitLayerValueAt(waterloggedTopLayer ? block.topLayer.waterlogged : block.topLayer.normal, x, y, true);
     if (block.treeLayer != null && slope < 0.5) dimension.setLayerValueAt(block.treeLayer, x, y, MAX_TREE_SPAWN_RATE);
     //if (block.biome != null) dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, block.biome);
-  });
+  }, "coastline blocks");
 };
 
 const doRest = () => {
