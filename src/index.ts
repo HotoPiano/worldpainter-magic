@@ -255,58 +255,58 @@ const SAND_COAST_MAX_WIDTH = 15;
 const SAVANNA_COAST_MAX_WIDTH = 5;
 
 const coastLineIteration = (
-  _x: number,
-  _y: number,
+  x: number,
+  y: number,
   xInitial: number,
   yInitial: number,
   //direction: "left" | "up" | "right" | "down",
   canDoSand: boolean
 ) => {
-  loopOffset(_x, _y, 1, 1, (x, y) => {
-    const isWithinCircleRadius =
-      Math.abs((x - xInitial) * (x - xInitial)) + Math.abs((y - yInitial) * (y - yInitial)) <= SAND_COAST_MAX_WIDTH * SAND_COAST_MAX_WIDTH;
-    if (!isWithinCircleRadius) return;
-    if ((_x == x && _y == y) || (_x != x && _y != y)) return; // only square neighbours
-    /*
+  //loopOffset(_x, _y, 1, 1, (x, y) => {
+  const isWithinCircleRadius =
+    Math.abs((x - xInitial) * (x - xInitial)) + Math.abs((y - yInitial) * (y - yInitial)) <= SAND_COAST_MAX_WIDTH * SAND_COAST_MAX_WIDTH;
+  if (!isWithinCircleRadius) return;
+  //if ((_x == x && _y == y) || (_x != x && _y != y)) return; // only square neighbours
+  /*
     if (direction === "left" && !(x < _x && y <= _y)) return;
     if (direction === "up" && !(x >= _x && y < _y)) return;
     if (direction === "right" && !(x > _x && y >= _y)) return;
     if (direction === "down" && !(x <= _x && y > _y)) return;
     */
 
-    const outsideBounds =
-      x < xInitial - SAND_COAST_MAX_WIDTH ||
-      x > xInitial + SAND_COAST_MAX_WIDTH ||
-      y < yInitial - SAND_COAST_MAX_WIDTH ||
-      y > yInitial + SAND_COAST_MAX_WIDTH;
-    if (outsideBounds) return;
-    const outsideSavanna =
-      x < xInitial - SAVANNA_COAST_MAX_WIDTH ||
-      x > xInitial + SAVANNA_COAST_MAX_WIDTH ||
-      y < yInitial - SAVANNA_COAST_MAX_WIDTH ||
-      y > yInitial + SAVANNA_COAST_MAX_WIDTH;
+  const outsideBounds =
+    x < xInitial - SAND_COAST_MAX_WIDTH ||
+    x > xInitial + SAND_COAST_MAX_WIDTH ||
+    y < yInitial - SAND_COAST_MAX_WIDTH ||
+    y > yInitial + SAND_COAST_MAX_WIDTH;
+  if (outsideBounds) return;
+  const outsideSavanna =
+    x < xInitial - SAVANNA_COAST_MAX_WIDTH ||
+    x > xInitial + SAVANNA_COAST_MAX_WIDTH ||
+    y < yInitial - SAVANNA_COAST_MAX_WIDTH ||
+    y > yInitial + SAVANNA_COAST_MAX_WIDTH;
 
-    /*
+  /*
     for (let i = 0; i < checkedPositions.length; i++) {
       if (checkedPositions[i] == x + "-" + y) return;
     }
     checkedPositions.push(x + "-" + y);
     */
 
-    // if already checked, go to next iteration
-    if (dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Annotations.INSTANCE, x, y) != 0) {
-      //coastLineIteration(x, y, xInitial, yInitial, direction, canDoSand);
-      return;
-    }
+  // if already checked, go to next iteration
+  if (dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Annotations.INSTANCE, x, y) != 0) {
+    //coastLineIteration(x, y, xInitial, yInitial, direction, canDoSand);
+    return;
+  }
 
-    /*
+  /*
     if (dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y) != 255) {
       coastLineIteration(x, y, xInitial, yInitial, canDoSand);
       return;
     }
     */
 
-    /*
+  /*
     let hasFloodedNeighbour = false;
     let hasLandNeighbour = false;
     loopOffset(x, y, 1, 1, (x2, y2) => {
@@ -320,49 +320,49 @@ const coastLineIteration = (
     if (hasFloodedNeighbour && hasLandNeighbour) return;
     */
 
-    const alreadyPlacedSand = dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y) == BIOMES.SAVANNA;
-    let doSand = true;
+  const alreadyPlacedSand = dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y) == BIOMES.SAVANNA;
+  let doSand = true;
 
-    //if (!alreadyPlacedSand) {
-    const height = dimension.getHeightAt(x, y);
-    const addedSlope = height / HEIGHEST_HEIGHT / 2 - 0.2;
-    const actualSlope = dimension.getSlope(x, y);
-    const slope = actualSlope + addedSlope;
-    //const waterLevel = dimension.getWaterLevelAt(x, y);
-    const floodedCountZero = dimension.getFloodedCount(x, y, 0, false);
+  //if (!alreadyPlacedSand) {
+  const height = dimension.getHeightAt(x, y);
+  const addedSlope = height / HEIGHEST_HEIGHT / 2 - 0.2;
+  const actualSlope = dimension.getSlope(x, y);
+  const slope = actualSlope + addedSlope;
+  //const waterLevel = dimension.getWaterLevelAt(x, y);
+  const floodedCountZero = dimension.getFloodedCount(x, y, 0, false);
 
-    const canDoCoastLine = floodedCountZero > 0 || slope < MOUNTAIN_EDGE_SLOPE;
+  const canDoCoastLine = floodedCountZero > 0 || slope < MOUNTAIN_EDGE_SLOPE;
 
-    if (!canDoCoastLine) return;
+  if (!canDoCoastLine) return;
 
-    let layer: GroundCoverLayerType | null = null;
-    let topLayer: GroundCoverLayerType | null = null;
-    let treeLayer: any = null;
-    let terrain: any = null;
-    let biome: any = null;
+  let layer: GroundCoverLayerType | null = null;
+  let topLayer: GroundCoverLayerType | null = null;
+  let treeLayer: any = null;
+  let terrain: any = null;
+  let biome: any = null;
 
-    /*
+  /*
       const floodedCountTen = dimension.getFloodedCount(x, y, 10, false);
       //const doSand = canDoSand && slope < floodedCountTen / 1800;
       const doSand = canDoSand && slope < floodedCountTen / 1800;
       */
 
-    const floodedCountTen = dimension.getFloodedCount(x, y, SAND_COAST_MAX_WIDTH, false);
-    //const doSand = canDoSand && slope < floodedCountTen / 1800;
-    // floodedCount10 = 100: slope < 0.05
-    // floodedcount10 = 2: slope < 0.001
-    doSand = slope < floodedCountTen / (140 * SAND_COAST_MAX_WIDTH); // canDoSand &&
+  const floodedCountTen = dimension.getFloodedCount(x, y, SAND_COAST_MAX_WIDTH, false);
+  //const doSand = canDoSand && slope < floodedCountTen / 1800;
+  // floodedCount10 = 100: slope < 0.05
+  // floodedcount10 = 2: slope < 0.001
+  doSand = slope < floodedCountTen / (140 * SAND_COAST_MAX_WIDTH); // canDoSand &&
 
-    //const doSand = actualSlope < 0.2;
+  //const doSand = actualSlope < 0.2;
 
-    //const doDesertBiome = slope < floodedCountTen / 1400;
+  //const doDesertBiome = slope < floodedCountTen / 1400;
 
-    //const { waterloggedLayer, waterloggedTopLayer } = isWaterlogged(floodedCountZero, waterLevel, height);
+  //const { waterloggedLayer, waterloggedTopLayer } = isWaterlogged(floodedCountZero, waterLevel, height);
 
-    if (doSand) {
-      dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Annotations.INSTANCE, x, y, 1);
-      dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, BIOMES.SAVANNA);
-      /*
+  if (doSand) {
+    dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Annotations.INSTANCE, x, y, 1);
+    dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, BIOMES.SAVANNA);
+    /*
         biome = BIOMES.SAVANNA;
         layer = floodedCountZero > 0 ? layers.beachBottom : layers.beachTop;
         terrain = terrains.beachBottom;
@@ -374,10 +374,10 @@ const coastLineIteration = (
           topLayer = layers.rocksBeach;
         }
         */
-    } else if (floodedCountZero > 0) {
-      dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Annotations.INSTANCE, x, y, 1);
-      dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, BIOMES.BEACH);
-    } /*else if (!outsideSavanna) {
+  } else if (floodedCountZero > 0) {
+    dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Annotations.INSTANCE, x, y, 1);
+    dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, BIOMES.BEACH);
+  } /*else if (!outsideSavanna) {
       //dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Annotations.INSTANCE, x, y, 1);
       //dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, BIOMES.BEACH);
       //biome = BIOMES.BEACH;
@@ -385,12 +385,12 @@ const coastLineIteration = (
       //topLayer = floodedCountZero > 0 ? layers.plantsCoastalWaterlogged : layers.plantsCoastal;
       //terrain = terrains.seabed;
     }*/ else {
-      // if nothing is placed, we stop because we want sand to be connected to water
-      return;
-    }
-    //}
+    // if nothing is placed, we stop because we want sand to be connected to water
+    return;
+  }
+  //}
 
-    /*
+  /*
       if (layer != null) dimension.setBitLayerValueAt(waterloggedLayer ? layer.waterlogged : layer.normal, x, y, true);
       if (terrain != null) dimension.setTerrainAt(x, y, terrain);
 
@@ -401,8 +401,11 @@ const coastLineIteration = (
       if (biome != null) dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, biome);
       */
 
-    coastLineIteration(x, y, xInitial, yInitial, doSand);
-  });
+  coastLineIteration(x - 1, y, xInitial, yInitial, doSand);
+  coastLineIteration(x, y - 1, xInitial, yInitial, doSand);
+  coastLineIteration(x + 1, y, xInitial, yInitial, doSand);
+  coastLineIteration(x, y + 1, xInitial, yInitial, doSand);
+  //});
 };
 
 const doSnow = (block: Block, { x, y, addedSlope, floodedCountZero, height, slope }: Environment): boolean => {
