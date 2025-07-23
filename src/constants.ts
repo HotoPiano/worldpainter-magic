@@ -1,7 +1,7 @@
 const homePath = java.lang.System.getProperty("user.home");
 const appDataPath = java.lang.System.getenv("AppData");
 
-//const EXISTING_WORLDPAINTER_WORLD_NAME = "duskridge20g_high-res-heightmap.world";
+//const EXISTING_WORLDPAINTER_WORLD_NAME = "duskridge20h_high-res-heightmap.world";
 const EXISTING_WORLDPAINTER_WORLD_NAME = "test.world";
 const isArdaCraft = true;
 
@@ -33,7 +33,7 @@ export const BIOMES = {
 export const JAVA_COLORS = [
   //java.awt.Color.BLACK,
   //java.awt.Color.BLUE,
-  java.awt.Color.CYAN,
+  //java.awt.Color.CYAN,
   //java.awt.Color.DARK_GRAY,
   //java.awt.Color.GRAY,
   java.awt.Color.GREEN,

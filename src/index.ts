@@ -5,7 +5,16 @@ import log from "./log";
 import world, { exportWorld, saveWorld } from "./world";
 import dimension from "./dimension";
 import { endX, endY, loopCoordinates, loopOffset, mapHeight, mapWidth, startX, startY } from "./mapDimensions";
-import { getRandomBlockNeighbour, getRandomNumber, getSteeperNeighbours, isWaterlogged, raiseAll, spaceForTree } from "./utils";
+import {
+  fromEntries,
+  getRandomBlockNeighbour,
+  getRandomNumber,
+  getSteeperNeighbours,
+  isWaterlogged,
+  raiseAll,
+  spaceForTree,
+  timeElapsedText,
+} from "./utils";
 import { BIOMES, MAX_TREE_SPAWN_RATE } from "./constants";
 import { customObjectLayers, layers, terrains } from "./palettes/currentPalette";
 
@@ -98,12 +107,18 @@ const doCoastline = () => {
     const block: Block = { layer: null, topLayer: null, treeLayer: null, terrain: null, biome: null };
     //const enviroment: Environment = { addedSlope, floodedCountZero, height, slope, x, y };
 
-    if (existingBiome === BIOMES.BEACH && floodedCountZero > 0) {
+    if (
+      existingBiome === BIOMES.BEACH &&
+      floodedCountZero > 0 // () || (floodedCountZero > 0 && slope >= 0.4)
+    ) {
       //biome = BIOMES.BEACH;
       block.layer = layers.lakebed;
       block.topLayer = floodedCountZero > 0 ? layers.plantsCoastalWaterlogged : layers.plantsCoastal;
       block.terrain = terrains.seabed;
-    } else if (existingBiome === BIOMES.SAVANNA || existingBiome === BIOMES.BEACH) {
+    } else if (
+      existingBiome === BIOMES.SAVANNA ||
+      existingBiome === BIOMES.BEACH // () || (floodedCountZero > 0 && slope < 0.4)
+    ) {
       //biome = BIOMES.SAVANNA;
       block.layer = floodedCountZero > 0 ? layers.beachBottom : layers.beachTop;
       block.terrain = terrains.beachBottom;
@@ -132,6 +147,10 @@ const doCoastline = () => {
   }, "coastline blocks");
 };
 
+const treeCounts: Record<string, number> = fromEntries(
+  Object.keys(customObjectLayers).map((key) => [(customObjectLayers as any)[key].getName(), 0])
+);
+
 const doRest = () => {
   loopCoordinates((x, y, tileNumber) => {
     if (currentTile != tileNumber) {
@@ -150,7 +169,7 @@ const doRest = () => {
     //const actualSlope = dimension.getSlope(x, y);
     /// 500 / 2000 / 2 = 0.5 - 0.8 = -0.675
     /// 2000 / 2000 / 2 = 0.5 - 0.8 = -0.3
-    const addedSlope = height / HEIGHEST_HEIGHT / 2 - 0.5;
+    const addedSlope = height / HEIGHEST_HEIGHT / 2 - 0.6; // -0.5 i h
     const actualSlope = dimension.getSlope(x, y);
     const slope = actualSlope + addedSlope;
     const waterLevel = dimension.getWaterLevelAt(x, y);
@@ -235,7 +254,19 @@ const doRest = () => {
       dimension.setBitLayerValueAt(waterloggedTopLayer ? block.topLayer.waterlogged : block.topLayer.normal, x, y, true);
     if (block.treeLayer != null && slope < 0.5) dimension.setLayerValueAt(block.treeLayer, x, y, MAX_TREE_SPAWN_RATE);
     if (block.biome != null) dimension.setLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y, block.biome);
+
+    if (block.treeLayer) {
+      const treeLayerName = block.treeLayer.getName();
+      //if (treeCounts[treeLayerName] == null) treeCounts[treeLayerName] = 1;
+      //else treeCounts[treeLayerName] = treeCounts[treeLayerName] + 1;
+      treeCounts[treeLayerName] = treeCounts[treeLayerName] + 1;
+    }
   }, "the rest");
+
+  log("Foliage count:");
+  Object.keys(treeCounts).forEach((key) => {
+    log(key + ": " + treeCounts[key]);
+  });
 };
 
 // x-y = 15-15
@@ -299,12 +330,14 @@ const coastLineIteration = (
     return;
   }
 
-  /*
-    if (dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y) != 255) {
-      coastLineIteration(x, y, xInitial, yInitial, canDoSand);
-      return;
-    }
-    */
+  const existingBiome = dimension.getLayerValueAt(org.pepsoft.worldpainter.layers.Biome.INSTANCE, x, y);
+  if (existingBiome == BIOMES.SAVANNA || existingBiome == BIOMES.BEACH) {
+    coastLineIteration(x - 1, y, xInitial, yInitial, canDoSand);
+    coastLineIteration(x, y - 1, xInitial, yInitial, canDoSand);
+    coastLineIteration(x + 1, y, xInitial, yInitial, canDoSand);
+    coastLineIteration(x, y + 1, xInitial, yInitial, canDoSand);
+    return;
+  }
 
   /*
     let hasFloodedNeighbour = false;
@@ -408,13 +441,14 @@ const coastLineIteration = (
   //});
 };
 
+const SNOW_HEIGHT_LIMIT = Math.floor(HEIGHEST_HEIGHT / 3.5) + 20; // 2000 = 591
+const SNOW_BIOME_LIMIT = Math.floor(HEIGHEST_HEIGHT / 1.6); // 2000 = 1250
+const SNOW_SAME_AFTER = SNOW_HEIGHT_LIMIT * 2.5; // 1148;
+
 const doSnow = (block: Block, { x, y, addedSlope, floodedCountZero, height, slope }: Environment): boolean => {
   if (floodedCountZero > 0) return false;
 
   let didSetSnow = false;
-  const SNOW_HEIGHT_LIMIT = Math.floor(HEIGHEST_HEIGHT / 3.5) + 20; // 2000 = 591
-  const SNOW_BIOME_LIMIT = Math.floor(HEIGHEST_HEIGHT / 1.6); // 2000 = 1250
-  const SNOW_SAME_AFTER = SNOW_HEIGHT_LIMIT * 2.5; // 1148;
 
   //log(HEIGHEST_HEIGHT);
 
@@ -437,7 +471,8 @@ const doSnow = (block: Block, { x, y, addedSlope, floodedCountZero, height, slop
   const slopeLimit2 = Math.min(height, SNOW_SAME_AFTER) / (50 * onePerHoundredHeight);
   // (500 / 2000 = 0.25) * 2 = 0.5
   // (1500 / 2000 = 0.75) * 2 = 1.5
-  const slopeLimit = (Math.min(height, SNOW_SAME_AFTER) / HEIGHEST_HEIGHT) * 2;
+  //const slopeLimit = (Math.min(height, SNOW_SAME_AFTER) / HEIGHEST_HEIGHT) * 2; // brukte på _h
+  const slopeLimit = (Math.min(height, SNOW_SAME_AFTER) / HEIGHEST_HEIGHT) * 2.5;
 
   // consider making top y directions (north) not as impactful, so those with most sun is not as snowy? or something else
   const range = getRandomNumber(15, 20); // 40, 60
@@ -804,4 +839,4 @@ if (willExportWorld) exportWorld();
 
 const dateEnd = new Date();
 log("----------------------------------------");
-log("magic complete!!! All in all took " + Math.round((dateEnd.getTime() - dateStart.getTime()) / 1000) + " seconds");
+log("magic complete!!! All in all took " + timeElapsedText(dateStart, dateEnd));

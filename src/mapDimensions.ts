@@ -1,5 +1,6 @@
 import dimension from "./dimension";
 import log from "./log";
+import { timeElapsedText } from "./utils";
 
 const TILESIZE = 128;
 const TILE_COUNT_TEXT = dimension.getWidth() + " * " + dimension.getHeight();
@@ -43,14 +44,7 @@ export const loopCoordinates = (func: (x: number, y: number, tileNumber: number)
   }
   if (!withoutLogging) {
     const dateEnd = new Date();
-    const timeMillis = dateEnd.getTime() - dateStart.getTime();
-    const seconds = Math.floor(timeMillis / 1000) % 60;
-    const minutes = Math.floor(timeMillis / 1000 / 60) % 60;
-    const hours = Math.floor(timeMillis / 1000 / 60 / 60);
-    const hoursText = hours > 0 ? hours + " hour" + (hours > 1 ? "s" : "") + ", " : "";
-    const minutesText = minutes > 0 ? minutes + " minute" + (minutes > 1 ? "s" : "") + " and " : "";
-    const secondsText = seconds + " second" + (seconds > 1 ? "s" : "");
-    log("took " + hoursText + minutesText + secondsText); // took 1 hour(s)
+    log("took " + timeElapsedText(dateStart, dateEnd)); // took 1 hour(s)
   }
 };
 

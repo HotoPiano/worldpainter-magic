@@ -137,3 +137,20 @@ export const getRandomBlockNeighbour = (x: number, y: number) => {
     y: y + (getRandomNumber(1, 2) == 1 ? -1 : 1),
   };
 };
+
+export const timeElapsedText = (dateStart: Date, dateEnd: Date) => {
+  const timeMillis = dateEnd.getTime() - dateStart.getTime();
+  const seconds = Math.floor(timeMillis / 1000) % 60;
+  const minutes = Math.floor(timeMillis / 1000 / 60) % 60;
+  const hours = Math.floor(timeMillis / 1000 / 60 / 60);
+  const hoursText = hours > 0 ? hours + " hour" + (hours > 1 ? "s" : "") + ", " : "";
+  const minutesText = minutes > 0 ? minutes + " minute" + (minutes > 1 ? "s" : "") + " and " : "";
+  const secondsText = seconds + " second" + (seconds > 1 ? "s" : "");
+  return hoursText + minutesText + secondsText;
+};
+
+export function fromEntries(entries: any) {
+  var res = {};
+  for (var i = 0; i < entries.length; i++) (res as any)[entries[i][0]] = entries[i][1];
+  return res;
+}
