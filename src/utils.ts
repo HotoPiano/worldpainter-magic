@@ -49,10 +49,11 @@ export const spaceForTree = (x: number, y: number, thinTree?: boolean) => {
           dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2)
         ) {
           return;
-          // allow placement at outer edges that is not parallell to both x and y
-        } else if (x2 - x > 2 || x2 - x < -2 || y2 - y > 2 || y2 - y < -2) {
-          return;
         }
+      }
+      // allow placement at outer edges that is not parallell to both x and y
+      else if (Math.abs(x2 - x) > 2 || Math.abs(y2 - y) > 2) {
+        return;
       }
 
       if (
@@ -60,7 +61,9 @@ export const spaceForTree = (x: number, y: number, thinTree?: boolean) => {
         dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
         dimension.getLayerValueAt(customObjectLayers.poplarTrees, x2, y2) ||
         dimension.getLayerValueAt(customObjectLayers.aspenTrees, x2, y2) ||
-        dimension.getLayerValueAt(customObjectLayers.gorseTrees, x2, y2)
+        dimension.getLayerValueAt(customObjectLayers.gorseTrees, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.larchTreesTall, x2, y2) ||
+        dimension.getLayerValueAt(customObjectLayers.spruceTrees, x2, y2)
       ) {
         space = false;
         return true;
